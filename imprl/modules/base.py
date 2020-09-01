@@ -1,7 +1,6 @@
-from typing import Protocol, TypeVar, Any
+from typing import Any, Protocol, TypeVar
 
 from chex import PRNGKey
-
 from tjax.annotations import PyTree
 
 T = TypeVar("T", bound=Any, covariant=True)

@@ -1,5 +1,4 @@
 import jax.numpy as jnp
-
 import tjax
 
 from imprl.mdp.base import MDP

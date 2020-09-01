@@ -1,8 +1,7 @@
-from typing import Any, Callable, Optional, TypeVar, Protocol, Tuple, cast
+from typing import Any, Callable, Optional, Protocol, Tuple, TypeVar, cast
 
 import jax
 import jax.numpy as jnp
-
 import tjax
 
 from imprl.mdp.base import MDP, Array, StateActionArray

@@ -1,10 +1,9 @@
-from typing import Callable, Union, NamedTuple, Optional
+from typing import Callable, NamedTuple, Optional, Union
 
 import jax
 import jax.numpy as jnp
-
 import tjax
-from tjax.annotations import RealArray, PyTree
+from tjax.annotations import PyTree, RealArray
 
 from imprl.mdp.dense import DenseMDP
 from imprl.modules.base import Module
