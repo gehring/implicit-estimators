@@ -1,0 +1,34 @@
+[tool.poetry]
+name = "imprl"
+version = "0.1.0"
+description = ""
+authors = ["Clement Gehring <clement@gehring.io>"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+jax = "^0.1.75"
+jaxlib = "^0.1.52"
+numpy = "^1.19.1"
+fax = {git = "https://github.com/gehring/fax.git", rev = "root"}
+rlax = "^0.0.2"
+optax = "^0.0.1"
+tjax = "^0.4.2"
+
+[tool.poetry.dev-dependencies]
+pytest = "^6.0.1"
+flake8 = "^3.8.3"
+isort = "^5.4.2"
+mypy = "^0.782"
+
+[tool.isort]
+line_length = 100
+known_first_party = ["imprl"]
+known_third_party = ["fax", "jax", "tjax"]
+multi_line_output = 0
+skip = []
+
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"
