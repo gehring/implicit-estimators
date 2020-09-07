@@ -23,6 +23,6 @@ def test_value_solver(value_solver, mdp_instance):
 
     # assert that no 1-step qvalue is larger than the state value
     updated_values = mdp.lookahead_qvalues(values).max(axis=1)
-    updated_values, _ = value_solver.offset(updated_values)
+    updated_values = value_solver.offset(updated_values)
     no_improve = jax.tree_multimap(lambda x, y: jnp.all(x <= y), updated_values, values)
     assert all(jax.tree_leaves(no_improve))

@@ -17,6 +17,6 @@ def bellman_solve(init_values: Array[T, S],
                   ) -> Array[T, S]:
 
     def bellman_diff(values: Array[T, S], mdp: MDP[T, S, A]) -> Array[T, S]:
-        return solver.update_values(mdp, values)[0] - values
+        return solver.update_values(mdp, values) - values
 
     return fax.implicit.root_solve(bellman_diff, init_values, mdp, solver, rev_solver=rev_solver)

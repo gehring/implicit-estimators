@@ -27,8 +27,7 @@ def simple_dense_mdp():
 @pytest.fixture(scope="session", params=[simple_dense_mdp()])
 def mdp_instance(request, value_solver):
     mdp, values = request.param
-    return MDPTestInstance(mdp, value_solver.offset(values)[0])
-    # return request.param
+    return MDPTestInstance(mdp, value_solver.offset(values))
 
 
 @pytest.fixture(scope="session", params=[partial(value.ValueIteration, tol=1e-7, maxiter=2000)])

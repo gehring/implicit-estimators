@@ -5,7 +5,7 @@ import jax.numpy as jnp
 import tjax
 from tjax.annotations import PyTree, RealArray
 
-from imprl.mdp.dense import DenseMDP
+from imprl.mdp.dense import DenseLogits, DenseMDP
 from imprl.modules.base import Module
 
 
@@ -59,6 +59,6 @@ class ExplicitMDP(Module[DenseMDP]):
 
         return DenseMDP(
             rewards,
-            jax.nn.softmax(log_transitions, axis=-1),
+            DenseLogits(log_transitions),
             discounts
         )

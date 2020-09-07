@@ -10,6 +10,7 @@ class DenseProbs(ConditionalDistribution[int, int]):
     values: jnp.array
 
     def __getitem__(self, item):
+        print(self.values, item, self.values[item])
         return self.values[item]
 
     def sample(self, rng, state, action):
@@ -23,7 +24,6 @@ class DenseProbs(ConditionalDistribution[int, int]):
         return probs @ values
 
 
-@tjax.dataclass
 class DenseLogits(DenseProbs):
 
     def __getitem__(self, item):
@@ -39,3 +39,9 @@ class DenseMDP(MDP[jnp.float32, int, int]):
     @property
     def size(self):
         return sum(x.size if not isinstance(x, (float, int)) else 1 for x in jax.tree_leaves(self))
+
+    def num_states(self):
+        return self.rewards.shape[0]
+
+    def num_actions(self):
+        return self.rewards.shape[1]
