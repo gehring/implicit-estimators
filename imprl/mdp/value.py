@@ -3,6 +3,7 @@ from typing import Any, Callable, Protocol, TypeVar
 import jax
 import jax.numpy as jnp
 import tjax
+from jax.scipy import special
 
 from imprl.mdp.base import MDP, Array, StateActionArray
 
@@ -21,6 +22,10 @@ def mean_offset(x: Array[T, S]) -> Array[T, S]:
 
 def max_reduce(x: StateActionArray[T, S, A]) -> Array[T, S]:
     return x.max(axis=-1)
+
+
+def logsumexp_reduce(x: StateActionArray[T, S, A]) -> Array[T, S]:
+    return special.logsumexp(x, axis=-1)
 
 
 class ValueSolver(Protocol[T, S, A]):

@@ -13,9 +13,6 @@ class ExplicitWeights(Module):
     """
     implicit_module: Module = tjax.field(static=True)  # type: ignore
 
-    def __init__(self, implicit_module: Module):
-        self.implicit_module = implicit_module
-
     def init(self, key, *inputs):
         return self.implicit_module.apply(self.implicit_module.init(key, *inputs), *inputs)
 
@@ -32,10 +29,10 @@ class MDPSolveWeights(Module):
     mdp_module: Module[MDP] = tjax.field(static=True)  # type: ignore
 
     def init(self, key, *inputs):
-        return self.mdp_module.init(key, inputs)
+        return self.mdp_module.init(key, *inputs)
 
     def apply(self, params, *inputs, previous_values=None):
-        mdp = self.mdp_module(params, *inputs)
+        mdp = self.mdp_module.apply(params, *inputs)
         if previous_values is None:
             previous_values = mdp.rewards[:, 0]
         return self.solver(previous_values, mdp)

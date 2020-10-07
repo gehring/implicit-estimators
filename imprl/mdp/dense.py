@@ -10,7 +10,6 @@ class DenseProbs(ConditionalDistribution[int, int]):
     values: jnp.array
 
     def __getitem__(self, item):
-        print(self.values, item, self.values[item])
         return self.values[item]
 
     def sample(self, rng, state, action):

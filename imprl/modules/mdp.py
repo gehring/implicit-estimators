@@ -31,15 +31,15 @@ class MDPParams(NamedTuple):
 @tjax.dataclass
 class ExplicitMDP(Module[DenseMDP]):
     num_pseudo_actions: int
-    rewards_init: Callable = tjax.field(static=True)  # type: ignore
-    transition_init: Callable = tjax.field(static=True)  # type: ignore
+    rewards_init: Callable = tjax.field(default=init_rewards, static=True)  # type: ignore
+    log_transition_init: Callable = tjax.field(default=init_log_transitions, static=True)  # type: ignore  # noqa: E501
     discount_init: Union[Callable, RealArray] = tjax.field(static=True)
 
     def init(self, rng, inputs):
         num_states = inputs.shape[-1]
         rew_key, trans_key, discount_key = jax.random.split(rng, 3)
 
-        log_transitions = self.transition_init(
+        log_transitions = self.log_transition_init(
             trans_key, num_states, self.num_pseudo_actions, inputs.dtype)
         rewards = self.rewards_init(
             rew_key, num_states, self.num_pseudo_actions, inputs.dtype)
