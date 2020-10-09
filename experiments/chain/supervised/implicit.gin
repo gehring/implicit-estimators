@@ -3,10 +3,12 @@ import experiments.chain.supervised.experiment
 LEARNING_RATE = 1e-2
 BATCH_SIZE = 1
 DISCOUNT = 0.9
-MDP_MODULE_DISCOUNT = %DISCOUNT
 
-weights/ValueIteration.tol = 1e-2
-weights/ValueIteration.maxiter = 1000
+MDP_MODULE_DISCOUNT = %DISCOUNT
+WEIGHTS_VI_TOL = 1e-2
+
+weights/ValueIteration.tol = %WEIGHTS_VI_TOL
+weights/ValueIteration.maxiter = 2000
 weights/ValueIteration.reduce = @max_reduce
 weights/ValueIteration.offset = @identity_offset
 
@@ -16,9 +18,7 @@ weights/ExplicitMDP.discount_init = %MDP_MODULE_DISCOUNT
 MDPSolveWeights.solver = @weights/ValueIteration()
 MDPSolveWeights.mdp_module = @weights/ExplicitMDP()
 
-ExplicitWeights.implicit_module = @MDPSolveWeights()
-
-LinearModule.weight_module = @ExplicitWeights()
+LinearModule.weight_module = @MDPSolveWeights()
 
 dataset/ValueIteration.tol = 1e-4
 dataset/ValueIteration.maxiter = 10000

@@ -13,12 +13,9 @@ weights/ValueIteration.offset = @identity_offset
 weights/ExplicitMDP.num_pseudo_actions = 1
 weights/ExplicitMDP.discount_init = %MDP_MODULE_DISCOUNT
 
-MDPSolveWeights.solver = @weights/ValueIteration()
-MDPSolveWeights.mdp_module = @weights/ExplicitMDP()
+ExplicitMatrixWeights.mdp_module = @weights/ExplicitMDP()
 
-ExplicitWeights.implicit_module = @MDPSolveWeights()
-
-LinearModule.weight_module = @ExplicitWeights()
+LinearModule.weight_module = @ExplicitMatrixWeights()
 
 dataset/ValueIteration.tol = 1e-4
 dataset/ValueIteration.maxiter = 10000

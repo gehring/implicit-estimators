@@ -82,47 +82,11 @@ def generate_parameters(
         yield i, log_dir, dict(zip(names, values)), gin_configs, gin_params
 
 
-@gin.configurable
-def launch(hyperparams, gin_configs, gin_params, extra=None):
-    if extra is None:
-        extra = {}
+def launch(hyperparams, gin_configs, gin_params):
     log_dir = os.path.join(FLAGS.results_dir, f"{datetime.now()}")
 
-    config = hyperparams.copy()
-    shared_keys = extra.keys() & config.keys()
-    if shared_keys:
-        raise ValueError(
-            "Additional keyword arguments would override given hyperparameters.\n"
-            f"Overlapping keys: {list(shared_keys)}"
-        )
-    config.update(extra)
-
-    all_configs = list(generate_parameters(config, log_dir, gin_configs, gin_params))
+    all_configs = list(generate_parameters(hyperparams, log_dir, gin_configs, gin_params))
     with multiprocessing.Pool(FLAGS.max_concurrent, maxtasksperchild=1) as pool:
         outputs = pool.imap_unordered(start, all_configs, chunksize=1)
         for _ in tqdm(outputs, total=len(all_configs), dynamic_ncols=True):
             pass
-
-
-def main(argv):
-    if len(argv) > 1:
-        raise app.UsageError('Too many command-line arguments.')
-
-    # read config file(s).
-    gin_configs = []
-    for config_file in FLAGS.gin_file:
-        with open(config_file, "r") as file:
-            gin_configs.append(file.read())
-
-    gin_params = FLAGS.gin_param or []
-    gin.parse_config(gin_configs)
-    gin.parse_config(gin_params)
-
-    extra_config = {
-        "SEED": [secrets.randbits(128) for _ in range(FLAGS.num_seeds)],
-    }
-    launch(gin_configs=gin_configs, gin_params=gin_params, extra=extra_config)
-
-
-if __name__ == "__main__":
-    app.run(main)

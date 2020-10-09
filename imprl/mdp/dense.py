@@ -23,7 +23,11 @@ class DenseProbs(ConditionalDistribution[int, int]):
         return probs @ values
 
 
+@tjax.dataclass
 class DenseLogits(DenseProbs):
+
+    def __init__(self, values: jnp.array):
+        super().__init__(values)
 
     def __getitem__(self, item):
         return jax.nn.softmax(super().__getitem__(item), axis=-1)

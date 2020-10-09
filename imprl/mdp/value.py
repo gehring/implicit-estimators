@@ -66,7 +66,7 @@ class ValueIteration(ValueSolver[T, S, A]):
             values, old_values, i = args
             diff = values - old_values
             max_sqr_diff = (diff * diff).max()
-            return jnp.logical_or(max_sqr_diff > tol_sqr, i >= self.maxiter)
+            return jnp.logical_and(max_sqr_diff > tol_sqr, i < self.maxiter)
 
         def body(args):
             values, _, i = args
