@@ -53,7 +53,7 @@ class ExplicitMatrixWeights(Module):
         assert transitions.shape[1] == 1
         ainv = jnp.eye(transitions.shape[-1]) - mdp.discounts * jnp.squeeze(transitions)
         amat = jnp.linalg.inv(ainv)
-        return mdp.rewards, amat
+        return jnp.squeeze(mdp.rewards), amat
 
     def apply(self, params, *inputs):
         del inputs

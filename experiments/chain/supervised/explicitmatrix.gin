@@ -2,11 +2,11 @@ import experiments.chain.supervised.experiment
 
 LEARNING_RATE = 1e-2
 BATCH_SIZE = 1
-DISCOUNT = 0.9
+DISCOUNT = 0.99
 MDP_MODULE_DISCOUNT = %DISCOUNT
 
 weights/ValueIteration.tol = 1e-2
-weights/ValueIteration.maxiter = 1000
+weights/ValueIteration.maxiter = 2000
 weights/ValueIteration.reduce = @max_reduce
 weights/ValueIteration.offset = @identity_offset
 
@@ -35,6 +35,7 @@ batch_generator.batch_size = %BATCH_SIZE
 batch_generator.replace = True
 
 adam.learning_rate = %LEARNING_RATE
+sgd.learning_rate = %LEARNING_RATE
 
 experiment.train.model = @LinearModule()
 experiment.train.optimizer = @adam()

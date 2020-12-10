@@ -38,9 +38,10 @@ batch_generator.batch_size = %BATCH_SIZE
 batch_generator.replace = True
 
 adam.learning_rate = %LEARNING_RATE
+sgd.learning_rate = %LEARNING_RATE
 
 experiment.train.model = @LinearModule()
-experiment.train.optimizer = @adam()
+experiment.train.optimizer = @sgd()
 experiment.train.test_data = @supervised_chain_dataset()
 experiment.train.num_iterations = 200
 experiment.train.eval_period = 10
