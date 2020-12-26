@@ -1,0 +1,9 @@
+import chain.configurables
+
+create_chain_mdp.num_states = 31
+create_chain_mdp.slip_prob = 0.
+create_chain_mdp.good_reward = 10.
+create_chain_mdp.bad_reward = 1.
+create_chain_mdp.discount = 0.9
+
+supervised_dataset.mdp = @create_chain_mdp()

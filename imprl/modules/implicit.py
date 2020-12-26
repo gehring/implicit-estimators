@@ -1,3 +1,4 @@
+import jax
 import jax.numpy as jnp
 import tjax
 
@@ -35,7 +36,7 @@ class MDPSolveWeights(Module):
     def apply(self, params, *inputs, previous_values=None):
         mdp = self.mdp_module.apply(params, *inputs)
         if previous_values is None:
-            previous_values = mdp.rewards[:, 0]
+            previous_values = jax.lax.stop_gradient(mdp.rewards[:, 0])
         return implicit.bellman_solve(previous_values, mdp, self.solver)
 
 

@@ -1,0 +1,3 @@
+include "configs/supervised/base.gin"
+
+LinearModule.weight_module = @MDPSolveWeights()

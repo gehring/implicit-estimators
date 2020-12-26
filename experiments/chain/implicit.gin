@@ -1,12 +1,14 @@
-import experiments.chain.supervised.experiment
+import chain.configurables
 
 LEARNING_RATE = 1e-2
 BATCH_SIZE = 1
-DISCOUNT = 0.9
-MDP_MODULE_DISCOUNT = %DISCOUNT
+DISCOUNT = 0.99
 
-weights/ValueIteration.tol = 1e-2
-weights/ValueIteration.maxiter = 2000
+MDP_MODULE_DISCOUNT = %DISCOUNT
+WEIGHTS_VI_TOL = 1e-4
+
+weights/ValueIteration.tol = %WEIGHTS_VI_TOL
+weights/ValueIteration.maxiter = 5000
 weights/ValueIteration.reduce = @max_reduce
 weights/ValueIteration.offset = @identity_offset
 
@@ -16,36 +18,32 @@ weights/ExplicitMDP.discount_init = %MDP_MODULE_DISCOUNT
 MDPSolveWeights.solver = @weights/ValueIteration()
 MDPSolveWeights.mdp_module = @weights/ExplicitMDP()
 
-ExplicitWeights.implicit_module = @MDPSolveWeights()
-
-LinearModule.weight_module = @ExplicitWeights()
+LinearModule.weight_module = @MDPSolveWeights()
 
 dataset/ValueIteration.tol = 1e-4
 dataset/ValueIteration.maxiter = 10000
 dataset/ValueIteration.reduce = @max_reduce
 dataset/ValueIteration.offset = @identity_offset
 
-create_chain_mdp.num_states = 11
+create_chain_mdp.num_states = 31
 create_chain_mdp.slip_prob = 0.
 create_chain_mdp.good_reward = 10.
 create_chain_mdp.bad_reward = 1.
 create_chain_mdp.discount = %DISCOUNT
 
-supervised_chain_dataset.value_solver = @dataset/ValueIteration()
+supervised_dataset.mdp = @create_chain_mdp()
+supervised_dataset.value_solver = @dataset/ValueIteration()
 
-batch_generator.data = @supervised_chain_dataset()
+batch_generator.data = @supervised_dataset()
 batch_generator.batch_size = %BATCH_SIZE
 batch_generator.replace = True
 
 adam.learning_rate = %LEARNING_RATE
 sgd.learning_rate = %LEARNING_RATE
 
-experiment.train.model = @LinearModule()
-experiment.train.optimizer = @sgd()
-experiment.train.test_data = @supervised_chain_dataset()
-experiment.train.num_iterations = 200
-experiment.train.eval_period = 10
-
-experiment.run_loop.seed = %SEED
-
-run.target = @experiment.run_loop
+train.model = @LinearModule()
+#train.optimizer = @adam()
+train.optimizer = @sgd()
+train.test_data = @supervised_dataset()
+train.num_iterations = 200
+train.eval_period = 10
