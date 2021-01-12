@@ -15,7 +15,7 @@ env_name=$(basename $env_config_path .gin)
 results_dir=${3:-"${HOME}/results"}/$env_name/$agent_name/$(date +%Y%m%d%H%M)
 
 export XLA_FLAGS="--xla_cpu_multi_thread_eigen=false intra_op_parallelism_threads=1"
-export JAX_ENABLE_X64=True
+#export JAX_ENABLE_X64=True
 
 mkdir -p $results_dir
 
@@ -29,7 +29,8 @@ parallel --shuf --joblog $results_dir/joblog --header : --results $results_dir/r
       --gin_param MDP_MODULE_DISCOUNT={MDP_MODULE_DISCOUNT} \
       --results_dir $results_dir/{#}/" \
     ::: SEED $SEEDS \
-    ::: LEARNING_RATE $(for i in {1..3}; do bc -l <<< "2^-$i"; done) \
+    ::: LEARNING_RATE $(for i in {4..6}; do bc -l <<< "2^-$i"; done) \
     ::: BATCH_SIZE 1 5 25 \
     ::: MDP_MODULE_DISCOUNT 0.8 0.9 0.95
 #    ::: LEARNING_RATE $(for i in {0..2}; do bc -l <<< "2^(-$i + 1)"; done) \
+#    ::: LEARNING_RATE $(for i in {1..4}; do bc -l <<< "2^-$i"; done) \

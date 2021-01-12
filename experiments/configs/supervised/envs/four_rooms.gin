@@ -3,4 +3,9 @@ import four_rooms.configurables
 create_four_rooms.goal = (7, 1)
 create_four_rooms.discount = 0.9
 
-supervised_dataset.mdp = @create_four_rooms()
+supervised_mdp_dataset.mdp = @create_four_rooms()
+
+mdp_data_factory.data = @supervised_mdp_dataset()
+
+launch.data_factory = @mdp_data_factory
+

@@ -5,6 +5,14 @@ from imprl import mdp
 
 
 @gin.configurable
+def mdp_data_factory(key, data):
+    del key
+    # Since we're learning values for all MDP states, from a supervised learning perspective, the
+    # train and test data are the same.
+    return data, data
+
+
+@gin.configurable
 def create_chain_mdp(num_states, slip_prob=0., good_reward=10., bad_reward=1.,
                      discount=0.99):
     next_trans = np.roll(np.eye(num_states), 1, axis=-1)

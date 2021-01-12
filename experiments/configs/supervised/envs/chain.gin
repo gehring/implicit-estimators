@@ -6,4 +6,8 @@ create_chain_mdp.good_reward = 10.
 create_chain_mdp.bad_reward = 1.
 create_chain_mdp.discount = 0.9
 
-supervised_dataset.mdp = @create_chain_mdp()
+supervised_mdp_dataset.mdp = @create_chain_mdp()
+
+mdp_data_factory.data = @supervised_mdp_dataset()
+
+launch.data_factory = @mdp_data_factory

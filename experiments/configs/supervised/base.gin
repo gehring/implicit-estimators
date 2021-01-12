@@ -18,9 +18,8 @@ dataset/ValueIteration.maxiter = 10000
 dataset/ValueIteration.reduce = @max_reduce
 dataset/ValueIteration.offset = @identity_offset
 
-supervised_dataset.value_solver = @dataset/ValueIteration()
+supervised_mdp_dataset.value_solver = @dataset/ValueIteration()
 
-batch_generator.data = @supervised_dataset()
 batch_generator.batch_size = %BATCH_SIZE
 batch_generator.replace = True
 
@@ -29,8 +28,7 @@ sgd.learning_rate = %LEARNING_RATE
 
 train.model = @LinearModule()
 train.optimizer = @sgd()
-train.test_data = @supervised_dataset()
-train.num_iterations = 200
+train.num_iterations = 300
 train.eval_period = 10
 
 launch.seed = %SEED

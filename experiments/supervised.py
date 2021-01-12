@@ -39,6 +39,9 @@ gin.external_configurable(modules.ExplicitWeights)
 gin.external_configurable(modules.LinearModule)
 gin.external_configurable(modules.MDPSolveWeights)
 gin.external_configurable(modules.ExplicitMatrixWeights)
+gin.external_configurable(modules.normalized_scales)
+gin.external_configurable(modules.RBFEncoder)
+gin.external_configurable(modules.uniform_centers)
 
 gin.external_configurable(optax.sgd)
 gin.external_configurable(optax.adam)
@@ -55,7 +58,7 @@ class TrainBatch(NamedTuple):
 
 
 @gin.configurable
-def supervised_dataset(mdp, value_solver):
+def supervised_mdp_dataset(mdp, value_solver):
     optimal_values = value_solver(jnp.zeros((mdp.num_states(),)), mdp)
     return jnp.eye(mdp.num_states()), optimal_values
 
@@ -66,7 +69,7 @@ def batch_generator(key, data, batch_size, replace=True):
     while True:
         key, batch_key = jax.random.split(key)
         idx = jax.random.choice(batch_key, labels.shape[0], (batch_size,), replace=replace)
-        yield TrainBatch(inputs[idx], labels[idx])
+        yield TrainBatch(np.take(inputs, idx, axis=0), np.take(labels, idx, axis=0))
 
 
 @gin.configurable
@@ -125,13 +128,17 @@ def train(key, model, optimizer, batch_gen, test_data, num_iterations, eval_peri
 
 
 @gin.configurable
-def launch(seed):
+def launch(seed, data_factory):
     resuts_dir = os.path.expanduser(FLAGS.results_dir)
     os.makedirs(resuts_dir, exist_ok=True)
 
-    train_key, data_key = [s.generate_state(2) for s in np.random.SeedSequence(seed).spawn(2)]
-    batch_gen = batch_generator(key=data_key)
-    _, results = train(key=train_key, batch_gen=batch_gen)
+    train_key, batch_key, data_key = [
+        s.generate_state(2) for s in np.random.SeedSequence(seed).spawn(3)
+    ]
+    train_data, test_data = data_factory(key=data_key)
+    batch_gen = batch_generator(key=batch_key, data=train_data)
+
+    _, results = train(key=train_key, batch_gen=batch_gen, test_data=test_data)
 
     logs_path = os.path.join(resuts_dir, "logs.csv")
     pd.DataFrame.from_records(results).to_csv(logs_path, index=False)

@@ -11,6 +11,14 @@ from imprl.mdp import dense
 _GRID_ACTIONS = [(1, 0), (-1, 0), (0, 1), (0, -1)]
 
 
+@gin.configurable
+def mdp_data_factory(key, data):
+    del key
+    # Since we're learning values for all MDP states, from a supervised learning perspective, the
+    # train and test data are the same.
+    return data, data
+
+
 def _inside_grid(x, size):
     nonneg = all(i >= 0 for i in x)
     return nonneg and all(i < ub for i, ub in zip(x, size))
