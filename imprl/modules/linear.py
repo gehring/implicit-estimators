@@ -2,6 +2,8 @@ from typing import Optional
 
 import tjax
 
+import jax.numpy as jnp
+
 from imprl.modules.base import Module
 from imprl.modules.features import Encoder
 
@@ -12,14 +14,29 @@ class LinearModule(Module):
     """
     weight_module: Module = tjax.field(static=True)  # type: ignore
     encoder: Optional[Encoder] = tjax.field(static=True, default=None)  # type: ignore
+    use_bias: bool = tjax.field(static=True, default=False)  # type: ignore
 
     def init(self, key, inputs):
         if self.encoder is not None:
             inputs = self.encoder.apply(inputs)
-        return self.weight_module.init(key, inputs)
+
+        params = self.weight_module.init(key, inputs)
+        if self.use_bias:
+            params = (params, jnp.zeros((), dtype=inputs.dtype))
+
+        return params
 
     def apply(self, params, inputs):
         if self.encoder is not None:
             inputs = self.encoder.apply(inputs)
+
+        bias = None
+        if self.use_bias:
+            params, bias = params
+
         weights = self.weight_module.apply(params, inputs)
-        return inputs @ weights
+        output = inputs @ weights
+
+        if bias is not None:
+            output = output + bias
+        return output

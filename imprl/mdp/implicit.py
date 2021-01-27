@@ -44,8 +44,6 @@ def bellman_solve(init_values: Array[T, S],
     #     init_values,
     #     mdp,
     # )
-    # if rev_solver is None:
-    #     rev_solver = normal_equation_solve
 
     def bellman_diff(values: Array[T, S], mdp: MDP[T, S, A]) -> Array[T, S]:
         return solver.update_values(mdp, values) - values

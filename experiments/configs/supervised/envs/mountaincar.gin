@@ -6,7 +6,7 @@ rollout_dataset.max_traj_length = 200
 rollout_dataset.discount = 0.99
 
 mountaincar_data_factory.num_train_traj = 10
-mountaincar_data_factory.num_test_traj = 10
+mountaincar_data_factory.num_test_states = 1000
 
 uniform_centers.env = @MountainCar()
 uniform_centers.centers_per_dim = 20
@@ -16,7 +16,7 @@ normalized_scales.scale = 0.1
 
 RBFEncoder.centers = @uniform_centers()
 RBFEncoder.scales = @normalized_scales()
-RBFEncoder.normalized = False
+RBFEncoder.normalized = True
 
 LinearModule.encoder = @RBFEncoder()
 

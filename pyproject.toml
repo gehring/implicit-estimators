@@ -7,8 +7,8 @@ license = "MIT"
 
 [tool.poetry.dependencies]
 python = "^3.8"
-jax = "^0.2.7"
-jaxlib = "^0.1.57"
+jax = {path = "../../repos/jax/", develop = true}
+jaxlib = {path = "../../repos/jax/dist/jaxlib-0.1.60-cp38-none-manylinux2010_x86_64.whl"}
 numpy = "^1.19.1"
 fax = {git = "https://github.com/gehring/fax.git"}
 rlax = "^0.0.2"

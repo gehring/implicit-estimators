@@ -31,7 +31,17 @@ def mountaincar_policy(epsilon: chex.Numeric):
 
 
 @gin.configurable
-def rollout_dataset(key, num_traj: int, max_traj_length: int, discount: float):
+def rollout_dataset(key, *,
+                    max_traj_length: int,
+                    discount: float,
+                    num_traj: Optional[int] = None,
+                    num_steps: Optional[int] = None):
+    if num_traj == num_steps:
+        raise TypeError((
+            "Either `num_traj` or `num_steps` is required. Providing a value for both is not "
+            "supported."
+        ))
+
     env_seed, policy_seed = np.random.SeedSequence(key).spawn(2)
     policy_key = policy_seed.generate_state(2)
 
@@ -39,20 +49,31 @@ def rollout_dataset(key, num_traj: int, max_traj_length: int, discount: float):
     policy = mountaincar_policy()
     data = []
 
-    for i in range(num_traj):
+    traj_count = 0
+    step_count = 0
+    while ((num_traj is None or traj_count < num_traj)
+           and (num_steps is None or step_count < num_steps)):
+
+        traj_len_limit = max_traj_length
+        if num_steps is not None:
+            traj_len_limit = min((traj_len_limit, num_steps - step_count))
+
         traj_key, policy_key = jax.random.split(policy_key)
-        traj, _ = rollout.generate_trajectory(traj_key, env, policy, max_steps=max_traj_length)
+        traj, _ = rollout.generate_trajectory(traj_key, env, policy, max_steps=traj_len_limit)
         data.append(rollout.per_observation_discounted_returns(traj, discount))
+
+        traj_count += 1
+        step_count += data[-1][0].shape[0]
 
     observations, returns = zip(*data)
     return np.concatenate(observations), np.concatenate(returns)
 
 
 @gin.configurable
-def mountaincar_data_factory(key, num_train_traj: int, num_test_traj: int):
+def mountaincar_data_factory(key, num_train_traj: int, num_test_states: int):
     train_key, test_key = [s.generate_state(2) for s in np.random.SeedSequence(key).spawn(2)]
     train_data = rollout_dataset(key=train_key, num_traj=num_train_traj)
-    test_data = rollout_dataset(key=test_key, num_traj=num_test_traj)
+    test_data = rollout_dataset(key=test_key, num_steps=num_test_states)
     return train_data, test_data
 
 

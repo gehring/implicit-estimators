@@ -30,9 +30,11 @@ FLAGS = flags.FLAGS
 
 gin.external_configurable(value.identity_offset)
 gin.external_configurable(value.mean_offset)
+gin.external_configurable(value.fixed_offset)
 gin.external_configurable(value.logsumexp_reduce)
 gin.external_configurable(value.max_reduce)
 gin.external_configurable(value.ValueIteration)
+gin.external_configurable(value.RelativeValueIteration)
 
 gin.external_configurable(modules.ExplicitMDP)
 gin.external_configurable(modules.ExplicitWeights)

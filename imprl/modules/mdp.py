@@ -12,8 +12,13 @@ from imprl.modules.base import Module
 def init_log_transitions(key, num_states, num_actions, dtype):
     # Change this if you want a different distribution of inital weights.
     shape = (num_states, num_actions, num_states)
-    logprob = jnp.log(jax.random.dirichlet(key, jnp.ones(shape), dtype=dtype) + jnp.eye(shape[2])[:, None, :]) # + 3 * jnp.eye(shape[2])[:, None, :]
+    logprob = jnp.log(
+        jax.random.dirichlet(key, jnp.ones(shape), dtype=dtype)
+        + 2*jnp.eye(shape[2])[:, None, :]
+    )  # + 3 * jnp.eye(shape[2])[:, None, :]
     return logprob - jnp.max(logprob, axis=-1)[..., None]
+    # logprob = jnp.log(jax.random.dirichlet(key, jnp.ones(shape), dtype=dtype) + jnp.eye(shape[2])[:, None, :]) # + 3 * jnp.eye(shape[2])[:, None, :]
+    # return logprob - jnp.max(logprob, axis=-1)[..., None]
     # return (2 * jnp.eye(shape[2])[:, None, :]
     #         + jnp.exp(0.1 * jax.random.normal(key, shape, dtype=dtype)))
 

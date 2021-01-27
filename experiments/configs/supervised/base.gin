@@ -1,11 +1,16 @@
 LEARNING_RATE = 1e-2
 BATCH_SIZE = 1
-WEIGHTS_VI_TOL = 1e-4
+WEIGHTS_VI_TOL = 1e-6
 
 weights/ValueIteration.tol = %WEIGHTS_VI_TOL
 weights/ValueIteration.maxiter = 5000
 weights/ValueIteration.reduce = @max_reduce
 weights/ValueIteration.offset = @identity_offset
+
+weights/RelativeValueIteration.tol = %WEIGHTS_VI_TOL
+weights/RelativeValueIteration.maxiter = 5000
+weights/RelativeValueIteration.reduce = @max_reduce
+weights/RelativeValueIteration.offset = @fixed_offset
 
 weights/ExplicitMDP.num_pseudo_actions = 1
 weights/ExplicitMDP.discount_init = %MDP_MODULE_DISCOUNT
@@ -13,7 +18,7 @@ weights/ExplicitMDP.discount_init = %MDP_MODULE_DISCOUNT
 MDPSolveWeights.solver = @weights/ValueIteration()
 MDPSolveWeights.mdp_module = @weights/ExplicitMDP()
 
-dataset/ValueIteration.tol = 1e-4
+dataset/ValueIteration.tol = 1e-6
 dataset/ValueIteration.maxiter = 10000
 dataset/ValueIteration.reduce = @max_reduce
 dataset/ValueIteration.offset = @identity_offset
@@ -25,6 +30,8 @@ batch_generator.replace = True
 
 adam.learning_rate = %LEARNING_RATE
 sgd.learning_rate = %LEARNING_RATE
+
+LinearModule.use_bias = True
 
 train.model = @LinearModule()
 train.optimizer = @sgd()

@@ -78,6 +78,7 @@ def plot_domain_results(domain, ylim):
         implicit_df[best_implicit],
         explicit_df[best_explicit],
         y="residual_norm",
+        ylim=ylim,
     )
     fig.savefig(f"compare_{domain}_norm.pdf")
 
@@ -85,6 +86,7 @@ def plot_domain_results(domain, ylim):
         implicit_df[best_implicit],
         explicit_df[best_explicit],
         y="res_ones_norm",
+        ylim=ylim,
     )
     fig.savefig(f"compare_{domain}_ones_norm.pdf")
 

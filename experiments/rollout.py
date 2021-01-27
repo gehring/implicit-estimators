@@ -42,7 +42,7 @@ def discounted_returns(trajectory: Sequence[dm_env.TimeStep],
 
 def per_observation_discounted_returns(trajectory: Sequence[dm_env.TimeStep],
                                        extra_discount: chex.Numeric = 1.,
-                                       ) -> Tuple[Sequence[chex.Array], Sequence[chex.Numeric]]:
+                                       ) -> Tuple[np.ndarray, np.ndarray]:
     _, rewards, discounts, observations = zip(*trajectory)
     returns = [0.]
     for rew, discount in zip(rewards[:0:-1], discounts[:0:-1]):

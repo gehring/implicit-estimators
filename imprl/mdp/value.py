@@ -20,6 +20,10 @@ def mean_offset(x: Array[T, S]) -> Array[T, S]:
     return x - x.mean()
 
 
+def fixed_offset(x: Array[T, S]) -> Array[T, S]:
+    return x - x[0]
+
+
 def max_reduce(x: StateActionArray[T, S, A]) -> Array[T, S]:
     return x.max(axis=-1)
 
@@ -59,14 +63,55 @@ class ValueIteration(ValueSolver[T, S, A]):
         if self.offset is None:
             super().__setattr__("offset", identity_offset)
 
-    def __call__(self, init_values: Array[T, S], mdp: MDP[T, S, A]):
+    def is_converged(self, args):
         tol_sqr = self.tol * self.tol
+        values, old_values, i = args
+        diff = values - old_values
+        max_sqr_diff = (diff * diff).max()
+        return jnp.logical_and(max_sqr_diff > tol_sqr, i < self.maxiter)
 
-        def cond(args):
-            values, old_values, i = args
-            diff = values - old_values
-            max_sqr_diff = (diff * diff).max()
-            return jnp.logical_and(max_sqr_diff > tol_sqr, i < self.maxiter)
+    def __call__(self, init_values: Array[T, S], mdp: MDP[T, S, A]):
+
+        def body(args):
+            values, _, i = args
+            new_values = self.update_values(mdp, values)
+            return new_values, values, i + 1
+
+        init_values = self.offset(init_values)
+        new_values = self.update_values(mdp, init_values)
+        optimal_values, *_ = jax.lax.while_loop(
+            self.is_converged,
+            body,
+            (new_values, init_values, 1),
+        )
+
+        return optimal_values
+
+
+@tjax.dataclass
+class RelativeValueIteration(ValueSolver[T, S, A]):
+    tol: float = tjax.field(static=True)  # type: ignore
+    maxiter: int = tjax.field(static=True)  # type: ignore
+    reduce: Callable[[StateActionArray], Array] = tjax.field(default=max_reduce, static=True)  # type: ignore  # noqa: E501
+    offset: Callable[[Array], Array] = tjax.field(default=fixed_offset, static=True)  # type: ignore  # noqa: E501
+
+    def __post_init__(self):
+        if self.reduce is None:
+            super().__setattr__("reduce", max_reduce)
+        if self.offset is None:
+            super().__setattr__("offset", fixed_offset)
+
+    def is_converged(self, args):
+        values, old_values, i = args
+        diff = values - old_values
+        span = diff.max() - diff.min()
+        return jnp.logical_and(span > self.tol, i < self.maxiter)
+
+    def update_values(self, mdp: MDP[T, S, A], values: Array[T, S]) -> Array[T, S]:
+        qvalues = mdp.lookahead_qvalues(self.offset(values))
+        return self.reduce(qvalues)
+
+    def __call__(self, init_values: Array[T, S], mdp: MDP[T, S, A]):
 
         def body(args):
             values, _, i = args
@@ -75,7 +120,7 @@ class ValueIteration(ValueSolver[T, S, A]):
 
         new_values = self.update_values(mdp, init_values)
         optimal_values, *_ = jax.lax.while_loop(
-            cond,
+            self.is_converged,
             body,
             (new_values, init_values, 1),
         )
