@@ -1,21 +1,37 @@
 import seaborn as sns
 import matplotlib.pyplot as plt
 
+import pandas as pd
+
 from experiments import utils
 
 sns.set_theme()
 
+ylims = {
+    "chain": (0., 40.),
+    "four_rooms": (0., 5.),
+    "mountain_car": (0., 1900.),
+}
+
 results_path = {
     "chain": {
         "nobias": {
-            "implicit": "~/results/chain/implicit/202101111222",
-            "explicit": "~/results/chain/explicit/202101051403",
+            "implicit": "~/results/chain/implicit/202102021131",
+            "explicit": "~/results/chain/explicit/202102021048",
+        },
+        "bias": {
+            "implicit": "~/results/chain/implicit/202102021128",
+            "explicit": "~/results/chain/explicit/202102021043",
         },
     },
     "four_rooms": {
         "nobias": {
-            "implicit": "~/results/four_rooms/implicit/202101121451",
-            "explicit": "~/results/four_rooms/explicit/202101051401",
+            "implicit": "~/results/four_rooms/implicit/202102021111",
+            "explicit": "~/results/four_rooms/explicit/202102021114",
+        },
+        "bias": {
+            "implicit": "~/results/four_rooms/implicit/202102021120",
+            "explicit": "~/results/four_rooms/explicit/202102021124",
         },
     },
     "mountain_car": {
@@ -31,59 +47,127 @@ results_path = {
 }
 
 best_hparams = {
-    "explicit": {
-        "chain": [{"BATCH_SIZE": 1, "LEARNING_RATE": 1.},
-                  {"BATCH_SIZE": 5, "LEARNING_RATE": 2.},
-                  {"BATCH_SIZE": 25, "LEARNING_RATE": 2.}],
-        "four_rooms": [{"BATCH_SIZE": 1, "LEARNING_RATE": 1.},
-                       {"BATCH_SIZE": 5, "LEARNING_RATE": 2.},
-                       {"BATCH_SIZE": 25, "LEARNING_RATE": 2.}],
-        "mountain_car": [{"LEARNING_RATE": 2.}],
+    "chain": {
+        "nobias": {
+            "implicit": [{"BATCH_SIZE": 1, "MDP_MODULE_DISCOUNT": 0.8, "LEARNING_RATE": 0.125},
+                         {"BATCH_SIZE": 1, "MDP_MODULE_DISCOUNT": 0.9, "LEARNING_RATE": 0.0625},
+                         {"BATCH_SIZE": 1, "MDP_MODULE_DISCOUNT": 0.95, "LEARNING_RATE": 0.015625},
+                         {"BATCH_SIZE": 5, "MDP_MODULE_DISCOUNT": 0.8, "LEARNING_RATE": 0.25},
+                         {"BATCH_SIZE": 5, "MDP_MODULE_DISCOUNT": 0.9, "LEARNING_RATE": 0.125},
+                         {"BATCH_SIZE": 5, "MDP_MODULE_DISCOUNT": 0.95, "LEARNING_RATE": 0.03125},
+                         {"BATCH_SIZE": 25, "MDP_MODULE_DISCOUNT": 0.8, "LEARNING_RATE": 0.5},
+                         {"BATCH_SIZE": 25, "MDP_MODULE_DISCOUNT": 0.9, "LEARNING_RATE": 0.125},
+                         {"BATCH_SIZE": 25, "MDP_MODULE_DISCOUNT": 0.95, "LEARNING_RATE": 0.03125}],
+            "explicit": [{"BATCH_SIZE": 1, "LEARNING_RATE": 1.},
+                         {"BATCH_SIZE": 5, "LEARNING_RATE": 2.},
+                         {"BATCH_SIZE": 25, "LEARNING_RATE": 2.}],
+        },
+        "bias": {
+            "implicit": [{"BATCH_SIZE": 1, "MDP_MODULE_DISCOUNT": 0.8, "LEARNING_RATE": 0.125},
+                         {"BATCH_SIZE": 1, "MDP_MODULE_DISCOUNT": 0.9, "LEARNING_RATE": 0.0625},
+                         {"BATCH_SIZE": 1, "MDP_MODULE_DISCOUNT": 0.95, "LEARNING_RATE": 0.015625},
+                         {"BATCH_SIZE": 5, "MDP_MODULE_DISCOUNT": 0.8, "LEARNING_RATE": 0.25},
+                         {"BATCH_SIZE": 5, "MDP_MODULE_DISCOUNT": 0.9, "LEARNING_RATE": 0.125},
+                         {"BATCH_SIZE": 5, "MDP_MODULE_DISCOUNT": 0.95, "LEARNING_RATE": 0.03125},
+                         {"BATCH_SIZE": 25, "MDP_MODULE_DISCOUNT": 0.8, "LEARNING_RATE": 0.25},
+                         {"BATCH_SIZE": 25, "MDP_MODULE_DISCOUNT": 0.9, "LEARNING_RATE": 0.125},
+                         {"BATCH_SIZE": 25, "MDP_MODULE_DISCOUNT": 0.95, "LEARNING_RATE": 0.03125}],
+            "explicit": [{"BATCH_SIZE": 1, "LEARNING_RATE": 0.5},
+                         {"BATCH_SIZE": 5, "LEARNING_RATE": 1.},
+                         {"BATCH_SIZE": 25, "LEARNING_RATE": 1.}],
+        },
     },
-    "implicit": {
-        "chain": [{"BATCH_SIZE": 1, "MDP_MODULE_DISCOUNT": 0.8, "LEARNING_RATE": 0.25},
-                  {"BATCH_SIZE": 1, "MDP_MODULE_DISCOUNT": 0.9, "LEARNING_RATE": 0.125},
-                  {"BATCH_SIZE": 5, "MDP_MODULE_DISCOUNT": 0.8, "LEARNING_RATE": 0.5},
-                  {"BATCH_SIZE": 5, "MDP_MODULE_DISCOUNT": 0.9, "LEARNING_RATE": 0.25},
-                  {"BATCH_SIZE": 25, "MDP_MODULE_DISCOUNT": 0.8, "LEARNING_RATE": 0.5},
-                  {"BATCH_SIZE": 25, "MDP_MODULE_DISCOUNT": 0.9, "LEARNING_RATE": 0.25},
-                  {"MDP_MODULE_DISCOUNT": 0.95, "LEARNING_RATE": 0.0625}],
-        "four_rooms": [{"BATCH_SIZE": 1, "MDP_MODULE_DISCOUNT": 0.8, "LEARNING_RATE": 0.25},
-                       {"BATCH_SIZE": 1, "MDP_MODULE_DISCOUNT": 0.9, "LEARNING_RATE": 0.25},
-                       {"BATCH_SIZE": 1, "MDP_MODULE_DISCOUNT": 0.95, "LEARNING_RATE": 0.125},
-                       {"BATCH_SIZE": 5, "LEARNING_RATE": 0.5},
-                       {"BATCH_SIZE": 25, "LEARNING_RATE": 0.5}],
-        "mountain_car": [{"BATCH_SIZE": 1, "MDP_MODULE_DISCOUNT": 0.8, "LEARNING_RATE": 0.5},
-                         {"BATCH_SIZE": 1, "MDP_MODULE_DISCOUNT": 0.9, "LEARNING_RATE": 0.5},
-                         {"BATCH_SIZE": 1, "MDP_MODULE_DISCOUNT": 0.95, "LEARNING_RATE": 0.25},
-                         {"BATCH_SIZE": 5, "LEARNING_RATE": 0.5},
-                         {"BATCH_SIZE": 25, "LEARNING_RATE": 0.5}],
-    }
+    "four_rooms": {
+        "nobias": {
+            "implicit": [{"BATCH_SIZE": 1, "MDP_MODULE_DISCOUNT": 0.8, "LEARNING_RATE": 0.25},
+                         {"BATCH_SIZE": 1, "MDP_MODULE_DISCOUNT": 0.9, "LEARNING_RATE": 0.125},
+                         {"BATCH_SIZE": 1, "MDP_MODULE_DISCOUNT": 0.95, "LEARNING_RATE": 0.125},
+                         {"BATCH_SIZE": 5, "MDP_MODULE_DISCOUNT": 0.8, "LEARNING_RATE": 1.0},
+                         {"BATCH_SIZE": 5, "MDP_MODULE_DISCOUNT": 0.9, "LEARNING_RATE": 0.5},
+                         {"BATCH_SIZE": 5, "MDP_MODULE_DISCOUNT": 0.95, "LEARNING_RATE": 0.25},
+                         {"BATCH_SIZE": 25, "MDP_MODULE_DISCOUNT": 0.8, "LEARNING_RATE": 2.},
+                         {"BATCH_SIZE": 25, "MDP_MODULE_DISCOUNT": 0.9, "LEARNING_RATE": 2.},
+                         {"BATCH_SIZE": 25, "MDP_MODULE_DISCOUNT": 0.95, "LEARNING_RATE": 0.5}],
+            "explicit": [{"BATCH_SIZE": 1, "LEARNING_RATE": 1.},
+                         {"BATCH_SIZE": 5, "LEARNING_RATE": 2.},
+                         {"BATCH_SIZE": 25, "LEARNING_RATE": 2.}],
+        },
+        "bias": {
+            "implicit": [{"BATCH_SIZE": 1, "MDP_MODULE_DISCOUNT": 0.8, "LEARNING_RATE": 0.125},
+                         {"BATCH_SIZE": 1, "MDP_MODULE_DISCOUNT": 0.9, "LEARNING_RATE": 0.125},
+                         {"BATCH_SIZE": 1, "MDP_MODULE_DISCOUNT": 0.95, "LEARNING_RATE": 0.125},
+                         {"BATCH_SIZE": 5, "MDP_MODULE_DISCOUNT": 0.8, "LEARNING_RATE": 0.5},
+                         {"BATCH_SIZE": 5, "MDP_MODULE_DISCOUNT": 0.9, "LEARNING_RATE": 0.5},
+                         {"BATCH_SIZE": 5, "MDP_MODULE_DISCOUNT": 0.95, "LEARNING_RATE": 0.25},
+                         {"BATCH_SIZE": 25, "MDP_MODULE_DISCOUNT": 0.8, "LEARNING_RATE": 1.},
+                         {"BATCH_SIZE": 25, "MDP_MODULE_DISCOUNT": 0.9, "LEARNING_RATE": 1.},
+                         {"BATCH_SIZE": 25, "MDP_MODULE_DISCOUNT": 0.95, "LEARNING_RATE": 0.25}],
+            "explicit": [{"BATCH_SIZE": 1, "LEARNING_RATE": 0.5},
+                         {"BATCH_SIZE": 5, "LEARNING_RATE": 1.},
+                         {"BATCH_SIZE": 25, "LEARNING_RATE": 1.}],
+        },
+    },
+    "mountain_car": {
+        "nobias": {
+            "implicit": [{"BATCH_SIZE": 1, "MDP_MODULE_DISCOUNT": 0.8, "LEARNING_RATE": 1.},
+                         {"BATCH_SIZE": 1, "MDP_MODULE_DISCOUNT": 0.9, "LEARNING_RATE": 0.25},
+                         {"BATCH_SIZE": 1, "MDP_MODULE_DISCOUNT": 0.95, "LEARNING_RATE": 0.125},
+                         {"BATCH_SIZE": 5, "MDP_MODULE_DISCOUNT": 0.8, "LEARNING_RATE": 2.},
+                         {"BATCH_SIZE": 5, "MDP_MODULE_DISCOUNT": 0.9, "LEARNING_RATE": 1.},
+                         {"BATCH_SIZE": 5, "MDP_MODULE_DISCOUNT": 0.95, "LEARNING_RATE": 0.25},
+                         {"BATCH_SIZE": 25, "MDP_MODULE_DISCOUNT": 0.8, "LEARNING_RATE": 2.},
+                         {"BATCH_SIZE": 25, "MDP_MODULE_DISCOUNT": 0.9, "LEARNING_RATE": 2.},
+                         {"BATCH_SIZE": 25, "MDP_MODULE_DISCOUNT": 0.95, "LEARNING_RATE": 0.5}],
+            "explicit": [{"LEARNING_RATE": 2.}],
+        },
+        "bias": {
+            "implicit": [{"BATCH_SIZE": 1, "MDP_MODULE_DISCOUNT": 0.8, "LEARNING_RATE": 0.5},
+                         {"BATCH_SIZE": 1, "MDP_MODULE_DISCOUNT": 0.9, "LEARNING_RATE": 0.25},
+                         {"BATCH_SIZE": 1, "MDP_MODULE_DISCOUNT": 0.95, "LEARNING_RATE": 0.125},
+                         {"BATCH_SIZE": 5, "MDP_MODULE_DISCOUNT": 0.8, "LEARNING_RATE": 1.},
+                         {"BATCH_SIZE": 5, "MDP_MODULE_DISCOUNT": 0.9, "LEARNING_RATE": 0.5},
+                         {"BATCH_SIZE": 5, "MDP_MODULE_DISCOUNT": 0.95, "LEARNING_RATE": 0.25},
+                         {"BATCH_SIZE": 25, "MDP_MODULE_DISCOUNT": 0.8, "LEARNING_RATE": 1.},
+                         {"BATCH_SIZE": 25, "MDP_MODULE_DISCOUNT": 0.9, "LEARNING_RATE": 1.},
+                         {"BATCH_SIZE": 25, "MDP_MODULE_DISCOUNT": 0.95, "LEARNING_RATE": 0.5}],
+            "explicit": [{"LEARNING_RATE": 1.}],
+        },
+    },
 }
 
 
-def plot_domain_results(domain, ylim):
+def plot_implicit_and_explicit(prefix, paths, hparams, ylim):
     # load and plot implicit chain results
-    implicit_df = utils.load_results(results_path["implicit"][domain])
+    implicit_df = utils.load_results(paths["implicit"])
     fig = utils.plot_results(
         data=implicit_df,
         ylim=ylim,
-        best_hparams=best_hparams["implicit"]["chain"],
+        best_hparams=hparams["implicit"],
     )
-    fig.savefig(f"implicit_{domain}_norm.pdf")
+    fig.set_titles(row_template="$\eta = {row_name}$", col_template="Batch size = {col_name}")
+    fig.set_axis_labels("Iteration", "$||\mathbf{r}||_2$")
+    # fig._legend.set_title("Learning rate")
+    fig._legend.texts[0].set_text("Learning rate")
+    fig._legend.texts[-3].set_text("Best")
+    fig.savefig(f"{prefix}_implicit_norm.pdf")
 
     # load and plot explicit chain results
-    explicit_df = utils.load_results(results_path["explicit"][domain])
+    explicit_df = utils.load_results(paths["explicit"])
     fig = utils.plot_results(
         data=explicit_df,
         ylim=ylim,
-        best_hparams=best_hparams["explicit"]["chain"],
+        best_hparams=hparams["explicit"],
     )
-    fig.savefig(f"explicit_{domain}_norm.pdf")
+    fig.set_titles(row_template="$\eta = {row_name}$", col_template="Batch size = {col_name}")
+    fig.set_axis_labels("Iteration", "$||\mathbf{r}||_2$")
+    # fig._legend.set_title("Learning rate")
+    fig._legend.texts[0].set_text("Learning rate")
+    fig._legend.texts[-3].set_text("Best")
+    fig.savefig(f"{prefix}_explicit_norm.pdf")
 
     # filter by best hyper-parameters
-    best_implicit = utils.compute_best_mask(implicit_df, best_hparams["implicit"][domain])
-    best_explicit = utils.compute_best_mask(explicit_df, best_hparams["explicit"][domain])
+    best_implicit = utils.compute_best_mask(implicit_df, hparams["implicit"])
+    best_explicit = utils.compute_best_mask(explicit_df, hparams["explicit"])
 
     # plot comparisons for the chain results
     fig = utils.plot_comparison(
@@ -92,7 +176,9 @@ def plot_domain_results(domain, ylim):
         y="residual_norm",
         ylim=ylim,
     )
-    fig.savefig(f"compare_{domain}_norm.pdf")
+    fig.set_titles(row_template="$\eta = {row_name}$", col_template="Batch size = {col_name}")
+    fig.set_axis_labels("Iteration", "$||\mathbf{r}||_2$")
+    fig.savefig(f"{prefix}_compare_norm.pdf")
 
     fig = utils.plot_comparison(
         implicit_df[best_implicit],
@@ -100,14 +186,93 @@ def plot_domain_results(domain, ylim):
         y="res_ones_norm",
         ylim=ylim,
     )
-    fig.savefig(f"compare_{domain}_ones_norm.pdf")
+    fig.set_titles(row_template="$\eta = {row_name}$", col_template="Batch size = {col_name}")
+    fig.set_axis_labels("Iteration", "$r^\parallel ( \\theta )$")
+    fig.savefig(f"{prefix}_compare_ones_norm.pdf")
 
+
+def plot_domain_results(domain, ylim):
+    for use_bias, paths in results_path[domain].items():
+        prefix = f"{domain}_{use_bias}"
+        plot_implicit_and_explicit(prefix, paths, best_hparams[domain][use_bias], ylim)
+
+
+def load_joint_dataframe(paths, hparams, filter_dict, col_name):
+    # filter by best hyper-parameters
+    implicit_df = utils.load_results(paths["implicit"])
+    explicit_df = utils.load_results(paths["explicit"])
+
+    best_implicit = utils.compute_best_mask(implicit_df, hparams["implicit"])
+    best_explicit = utils.compute_best_mask(explicit_df, hparams["explicit"])
+
+    for name, val in filter_dict.items():
+        best_implicit &= implicit_df[name] == val
+        best_explicit &= explicit_df[name] == val
+
+    implicit_df = implicit_df[best_implicit].copy()
+    implicit_df[col_name] = "implicit"
+    explicit_df = explicit_df[best_explicit].copy()
+    explicit_df[col_name] = "explicit"
+
+    return pd.concat((implicit_df, explicit_df), ignore_index=True)
+
+
+def _plot_joint_data(data, y, col_name):
+    fig = sns.relplot(
+        data=data,
+        x="timestep",
+        y=y,
+        hue=col_name,
+        col="Domain",
+        kind="line",
+        ci="sd",
+        legend="full",
+        facet_kws=dict(
+            sharex=False,
+            sharey=False,
+            margin_titles=True,
+        ),
+    )
+    for i, domain in enumerate(results_path.keys()):
+        ax = fig.facet_axis(0, i)
+        ax.set_ylim(ylims[domain])
+
+    fig.set_titles(col_template="{col_name}")
+
+    return fig
+
+
+def plot_across_domains(use_bias, batch_size, eta):
+    col_name = "Parameterization"
+    pretty_names = {"chain": "Chain", "four_rooms": "Four rooms", "mountain_car": "Mountain car"}
+    filter_dict = {"BATCH_SIZE": batch_size, "MDP_MODULE_DISCOUNT": eta}
+
+    plot_df = []
+    for domain in results_path.keys():
+        data = load_joint_dataframe(
+            results_path[domain][use_bias], best_hparams[domain][use_bias], filter_dict, col_name)
+        data["Domain"] = pretty_names[domain]
+        plot_df.append(data)
+
+    plot_df = pd.concat(plot_df, ignore_index=True)
+
+    fig = _plot_joint_data(plot_df, "res_ones_norm", col_name)
+    fig.set_axis_labels("Iteration", "$r^\parallel ( \\theta )$")
+    fig.savefig("ones_compare.pdf")
+
+    fig = _plot_joint_data(plot_df, "residual_norm", col_name)
+    fig.set_axis_labels("Iteration", "$||\mathbf{r}||_2$")
+    fig.savefig("norm_compare.pdf")
+
+
+# load and plot cross domain comparison of residual along the ones vector
+plot_across_domains(use_bias="nobias", batch_size=25, eta=0.8)
 
 # load and plot chain results
-plot_domain_results("chain", ylim=(0., 40.))
+plot_domain_results("chain", ylim=ylims["chain"])
 
 # load and plot four rooms results
-plot_domain_results("four_rooms", ylim=(0., 5.))
+plot_domain_results("four_rooms", ylim=ylims["four_rooms"])
 
 # load and plot mountain car results
-plot_domain_results("mountain_car", ylim=(0., 1900.))
+plot_domain_results("mountain_car", ylim=ylims["mountain_car"])

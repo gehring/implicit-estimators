@@ -105,6 +105,7 @@ def plot_results(data, ylim=None, best_hparams=None, y="residual_norm", hue="LEA
         col="BATCH_SIZE",
         kind="line",
         ci="sd",
+        legend="full",
         facet_kws=facet_kws,
     )
 
