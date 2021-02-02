@@ -6,16 +6,28 @@ from experiments import utils
 sns.set_theme()
 
 results_path = {
-    "implicit": {
-        "chain": "~/results/chain/implicit/202101111222",
-        "four_rooms": "~/results/four_rooms/implicit/202101121451",
-        "mountain_car": "~/results/mountaincar/implicit/202101121507",
+    "chain": {
+        "nobias": {
+            "implicit": "~/results/chain/implicit/202101111222",
+            "explicit": "~/results/chain/explicit/202101051403",
+        },
     },
-    "explicit": {
-        "chain": "~/results/chain/explicit/202101051403",
-        "four_rooms": "~/results/four_rooms/explicit/202101051401",
-        "mountain_car": "~/results/mountaincar/explicit/202101121604",
-    }
+    "four_rooms": {
+        "nobias": {
+            "implicit": "~/results/four_rooms/implicit/202101121451",
+            "explicit": "~/results/four_rooms/explicit/202101051401",
+        },
+    },
+    "mountain_car": {
+        "nobias": {
+            "implicit": "~/results/mountaincar/implicit/202102020536",
+            "explicit": "~/results/mountaincar/explicit/202102020608",
+        },
+        "bias": {
+            "implicit": "~/results/mountaincar/implicit/202102020737",
+            "explicit": "~/results/mountaincar/explicit/202102020835",
+        },
+    },
 }
 
 best_hparams = {

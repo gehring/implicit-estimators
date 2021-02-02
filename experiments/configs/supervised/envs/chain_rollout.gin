@@ -1,0 +1,33 @@
+import chain.configurables
+
+NUM_STATES = 11
+CHAIN_DISCOUNT = 0.9
+
+create_chain_mdp.num_states = %NUM_STATES
+create_chain_mdp.slip_prob = 0.
+create_chain_mdp.good_reward = 10.
+create_chain_mdp.bad_reward = 1.
+create_chain_mdp.discount = %CHAIN_DISCOUNT
+
+ChainPolicy.epsilon = 0.1
+
+MDPEnv.mdp = @create_chain_mdp()
+
+train/rollout_dataset.env_cls = @MDPEnv
+train/rollout_dataset.policy = @ChainPolicy()
+train/rollout_dataset.max_traj_length = 100
+train/rollout_dataset.num_traj = 50
+train/rollout_dataset.discount = %CHAIN_DISCOUNT
+train/rollout_dataset.use_partial_traj = False
+
+test/supervised_mrc_dataset.mdp = @create_chain_mdp()
+test/supervised_mrc_dataset.policy = @ChainPolicy()
+
+dataset_factory.train_dataset_cls = @train/rollout_dataset
+dataset_factory.test_dataset_cls = @test/supervised_mrc_dataset
+
+OneHot.dim = %NUM_STATES
+
+LinearModule.encoder = @OneHot()
+
+launch.data_factory = @dataset_factory

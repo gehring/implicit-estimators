@@ -1,12 +1,17 @@
 import mountaincar.configurables
 
-mountaincar_policy.epsilon = 0.1
+MountainCarPolicy.epsilon = 0.1
 
+rollout_dataset.env_cls = @MountainCar
+rollout_dataset.policy = @MountainCarPolicy()
 rollout_dataset.max_traj_length = 200
 rollout_dataset.discount = 0.99
 
-mountaincar_data_factory.num_train_traj = 10
-mountaincar_data_factory.num_test_states = 1000
+train/rollout_dataset.num_traj = 10
+train/rollout_dataset.use_partial_traj = True
+
+test/rollout_dataset.num_steps = 1000
+test/rollout_dataset.use_partial_traj = True
 
 uniform_centers.env = @MountainCar()
 uniform_centers.centers_per_dim = 20
@@ -20,4 +25,7 @@ RBFEncoder.normalized = True
 
 LinearModule.encoder = @RBFEncoder()
 
-launch.data_factory = @mountaincar_data_factory
+dataset_factory.train_dataset_cls = @train/rollout_dataset
+dataset_factory.test_dataset_cls = @test/rollout_dataset
+
+launch.data_factory = @dataset_factory

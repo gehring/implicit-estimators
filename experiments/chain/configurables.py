@@ -1,7 +1,14 @@
 import gin
 import numpy as np
 
+import chex
+import rlax
+
+import jax
+
 from imprl import mdp
+
+from experiments import rollout
 
 
 @gin.configurable
@@ -10,6 +17,14 @@ def mdp_data_factory(key, data):
     # Since we're learning values for all MDP states, from a supervised learning perspective, the
     # train and test data are the same.
     return data, data
+
+
+@gin.configurable
+class ChainPolicy(rollout.EpsilonGreedyPolicy):
+
+    def preferences(self, observations):
+        del observations
+        return np.array([1., 0.])
 
 
 @gin.configurable

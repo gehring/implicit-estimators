@@ -4,11 +4,9 @@ import gin
 
 import dm_env
 from dm_env import specs
-import rlax
 
 import numpy as np
 
-import chex
 import jax
 import jax.numpy as jnp
 
@@ -16,65 +14,14 @@ from experiments import rollout
 
 
 @gin.configurable
-def mountaincar_policy(epsilon: chex.Numeric):
+class MountainCarPolicy(rollout.EpsilonGreedyPolicy):
 
-    @jax.jit
-    def policy(key: chex.PRNGKey, observation: chex.Array):
+    def preferences(self, observations):
         # prefer action along the current velocity
-        preferences = jax.lax.cond(observation[1] < 0,
-                                   lambda _: jnp.array([1., 0., 0.]),
-                                   lambda _: jnp.array([0., 0., 1.]),
-                                   None)
-        return rlax.epsilon_greedy(epsilon).sample(key, preferences)
-
-    return policy
-
-
-@gin.configurable
-def rollout_dataset(key, *,
-                    max_traj_length: int,
-                    discount: float,
-                    num_traj: Optional[int] = None,
-                    num_steps: Optional[int] = None):
-    if num_traj == num_steps:
-        raise TypeError((
-            "Either `num_traj` or `num_steps` is required. Providing a value for both is not "
-            "supported."
-        ))
-
-    env_seed, policy_seed = np.random.SeedSequence(key).spawn(2)
-    policy_key = policy_seed.generate_state(2)
-
-    env = MountainCar(seed=env_seed)
-    policy = mountaincar_policy()
-    data = []
-
-    traj_count = 0
-    step_count = 0
-    while ((num_traj is None or traj_count < num_traj)
-           and (num_steps is None or step_count < num_steps)):
-
-        traj_len_limit = max_traj_length
-        if num_steps is not None:
-            traj_len_limit = min((traj_len_limit, num_steps - step_count))
-
-        traj_key, policy_key = jax.random.split(policy_key)
-        traj, _ = rollout.generate_trajectory(traj_key, env, policy, max_steps=traj_len_limit)
-        data.append(rollout.per_observation_discounted_returns(traj, discount))
-
-        traj_count += 1
-        step_count += data[-1][0].shape[0]
-
-    observations, returns = zip(*data)
-    return np.concatenate(observations), np.concatenate(returns)
-
-
-@gin.configurable
-def mountaincar_data_factory(key, num_train_traj: int, num_test_states: int):
-    train_key, test_key = [s.generate_state(2) for s in np.random.SeedSequence(key).spawn(2)]
-    train_data = rollout_dataset(key=train_key, num_traj=num_train_traj)
-    test_data = rollout_dataset(key=test_key, num_steps=num_test_states)
-    return train_data, test_data
+        return jax.lax.cond(observations[1] < 0,
+                            lambda _: jnp.array([1., 0., 0.]),
+                            lambda _: jnp.array([0., 0., 1.]),
+                            None)
 
 
 @gin.configurable

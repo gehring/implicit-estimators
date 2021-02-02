@@ -70,3 +70,13 @@ class RBFEncoder(Encoder):
             return jax.nn.softmax(neg_dist)
         else:
             return jnp.exp(neg_dist)
+
+
+@tjax.dataclass
+class OneHot(Encoder):
+    """ A one-hot encoder.
+    """
+    dim: int = tjax.field(static=True)  # type: ignore
+
+    def apply(self, inputs):
+        return jax.nn.one_hot(inputs, self.dim)

@@ -3,10 +3,14 @@ from typing import AbstractSet, Tuple
 
 import gin
 
+import jax
+import jax.numpy as jnp
+
 import numpy as np
 
 from imprl.mdp import dense
 
+from experiments import rollout
 
 _GRID_ACTIONS = [(1, 0), (-1, 0), (0, 1), (0, -1)]
 
@@ -99,3 +103,15 @@ def create_four_rooms(goal, discount, fail_prob=1/3):
     probs /= probs.sum(axis=-1)[..., None]
 
     return dense.DenseMDP(rewards, dense.DenseProbs(probs), mdp.discounts)
+
+
+@gin.configurable
+class FourRoomsPolicy(rollout.EpsilonGreedyPolicy):
+
+    def __init__(self, epsilon, mdp, value_solver):
+        super().__init__(epsilon)
+        optimal_values = value_solver(jnp.zeros((mdp.num_states(),)), mdp)
+        self._qvalues = np.array(mdp.lookahead_qvalues(optimal_values))
+
+    def preferences(self, observations):
+        return jnp.take(self._qvalues, observations, axis=0)

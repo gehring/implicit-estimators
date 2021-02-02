@@ -1,0 +1,40 @@
+import four_rooms.configurables
+
+FOUR_ROOMS_DISCOUNT = 0.9
+
+create_four_rooms.goal = (7, 1)
+create_four_rooms.discount = %FOUR_ROOMS_DISCOUNT
+
+supervised_mdp_dataset.mdp = @create_four_rooms()
+
+policy/ValueIteration.tol = %WEIGHTS_VI_TOL
+policy/ValueIteration.maxiter = 5000
+policy/ValueIteration.reduce = @max_reduce
+policy/ValueIteration.offset = @identity_offset
+
+FourRoomsPolicy.epsilon = 0.1
+FourRoomsPolicy.mdp = @create_four_rooms()
+FourRoomsPolicy.value_solver = @policy/ValueIteration()
+
+MDPEnv.mdp = @create_four_rooms()
+
+train/rollout_dataset.env_cls = @MDPEnv
+train/rollout_dataset.policy = @FourRoomsPolicy()
+train/rollout_dataset.max_traj_length = 80
+train/rollout_dataset.num_traj = 80
+train/rollout_dataset.discount = %FOUR_ROOMS_DISCOUNT
+train/rollout_dataset.use_partial_traj = True
+
+test/supervised_mrc_dataset.mdp = @create_four_rooms()
+test/supervised_mrc_dataset.policy = @FourRoomsPolicy()
+
+dataset_factory.train_dataset_cls = @train/rollout_dataset
+dataset_factory.test_dataset_cls = @test/supervised_mrc_dataset
+
+OneHot.dim = 121
+
+LinearModule.encoder = @OneHot()
+
+launch.data_factory = @dataset_factory
+
+

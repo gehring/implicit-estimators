@@ -1,5 +1,5 @@
 import os
-from typing import NamedTuple
+from typing import NamedTuple, Optional
 
 from absl import app
 from absl import flags
@@ -13,10 +13,13 @@ import jax
 import jax.numpy as jnp
 import optax
 
+from tjax.annotations import PyTree
+
 from imprl import modules
 from imprl.mdp import value
 
-from tjax.annotations import PyTree
+from experiments import rollout
+
 
 if __name__ == "__main__":
     flags.DEFINE_multi_string(
@@ -43,6 +46,7 @@ gin.external_configurable(modules.MDPSolveWeights)
 gin.external_configurable(modules.ExplicitMatrixWeights)
 gin.external_configurable(modules.normalized_scales)
 gin.external_configurable(modules.RBFEncoder)
+gin.external_configurable(modules.OneHot)
 gin.external_configurable(modules.uniform_centers)
 
 gin.external_configurable(optax.sgd)
@@ -62,7 +66,21 @@ class TrainBatch(NamedTuple):
 @gin.configurable
 def supervised_mdp_dataset(mdp, value_solver):
     optimal_values = value_solver(jnp.zeros((mdp.num_states(),)), mdp)
-    return jnp.eye(mdp.num_states()), optimal_values
+    return np.eye(mdp.num_states()), np.array(optimal_values)
+
+
+@gin.configurable
+def supervised_mrc_dataset(key, mdp, policy):
+    del key
+
+    vprobs = jax.vmap(policy.probs)
+    a_probs = vprobs(jnp.arange((mdp.num_states(),)))
+
+    rewards = np.einsum("xa,xa->x", mdp.rewards, a_probs)
+    transitions = np.einsum("xay,xa->xy", mdp.transitions[:, :, :], a_probs)
+    values = np.linalg.solve(np.eye(mdp.num_states()) - mdp.discounts * transitions, rewards)
+
+    return np.arange(mdp.num_states()), np.array(values)
 
 
 @gin.configurable
@@ -72,6 +90,60 @@ def batch_generator(key, data, batch_size, replace=True):
         key, batch_key = jax.random.split(key)
         idx = jax.random.choice(batch_key, labels.shape[0], (batch_size,), replace=replace)
         yield TrainBatch(np.take(inputs, idx, axis=0), np.take(labels, idx, axis=0))
+
+
+@gin.configurable
+def rollout_dataset(key, *,
+                    env_cls,
+                    policy,
+                    max_traj_length: int,
+                    discount: float,
+                    num_traj: Optional[int] = None,
+                    num_steps: Optional[int] = None,
+                    use_partial_traj: bool = True):
+    if num_traj == num_steps:
+        raise TypeError((
+            "Either `num_traj` or `num_steps` is required. Providing a value for both is not "
+            "supported."
+        ))
+
+    env_seed, policy_seed = np.random.SeedSequence(key).spawn(2)
+    policy_key = policy_seed.generate_state(2)
+
+    env = env_cls(seed=env_seed.generate_state(1)[0])
+    data = []
+
+    traj_count = 0
+    step_count = 0
+    while ((num_traj is None or traj_count < num_traj)
+           and (num_steps is None or step_count < num_steps)):
+
+        traj_len_limit = max_traj_length
+        if num_steps is not None:
+            traj_len_limit = min((traj_len_limit, num_steps - step_count))
+
+        traj_key, policy_key = jax.random.split(policy_key)
+        traj, _ = rollout.generate_trajectory(traj_key, env, policy, max_steps=traj_len_limit)
+
+        observations, returns = rollout.per_observation_discounted_returns(traj, discount)
+        if not use_partial_traj:
+            observations = observations[:1]
+            returns = returns[:1]
+        data.append((observations, returns))
+
+        traj_count += 1
+        step_count += data[-1][0].shape[0]
+
+    observations, returns = zip(*data)
+    return np.concatenate(observations), np.concatenate(returns)
+
+
+@gin.configurable
+def dataset_factory(key, train_dataset_cls, test_dataset_cls):
+    train_key, test_key = [s.generate_state(2) for s in np.random.SeedSequence(key).spawn(2)]
+    train_data = train_dataset_cls(key=train_key)
+    test_data = test_dataset_cls(key=test_key)
+    return train_data, test_data
 
 
 @gin.configurable
