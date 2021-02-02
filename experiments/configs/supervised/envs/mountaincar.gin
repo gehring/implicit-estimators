@@ -28,4 +28,7 @@ LinearModule.encoder = @RBFEncoder()
 dataset_factory.train_dataset_cls = @train/rollout_dataset
 dataset_factory.test_dataset_cls = @test/rollout_dataset
 
+train.num_iterations = 300
+train.eval_period = 10
+
 launch.data_factory = @dataset_factory

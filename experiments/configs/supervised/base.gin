@@ -31,11 +31,9 @@ batch_generator.replace = True
 adam.learning_rate = %LEARNING_RATE
 sgd.learning_rate = %LEARNING_RATE
 
-LinearModule.use_bias = True
+LinearModule.use_bias = False
 
 train.model = @LinearModule()
 train.optimizer = @sgd()
-train.num_iterations = 300
-train.eval_period = 10
 
 launch.seed = %SEED

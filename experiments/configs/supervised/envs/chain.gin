@@ -10,4 +10,7 @@ supervised_mdp_dataset.mdp = @create_chain_mdp()
 
 mdp_data_factory.data = @supervised_mdp_dataset()
 
+train.num_iterations = 150
+train.eval_period = 5
+
 launch.data_factory = @mdp_data_factory

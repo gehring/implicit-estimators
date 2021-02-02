@@ -30,4 +30,7 @@ OneHot.dim = %NUM_STATES
 
 LinearModule.encoder = @OneHot()
 
+train.num_iterations = 300
+train.eval_period = 10
+
 launch.data_factory = @dataset_factory
