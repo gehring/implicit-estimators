@@ -7,6 +7,8 @@ from experiments import utils
 
 sns.set_theme()
 
+COL_NAME = "Parameterization"
+
 ylims = {
     "chain": (0., 40.),
     "four_rooms": (0., 5.),
@@ -16,12 +18,12 @@ ylims = {
 results_path = {
     "chain": {
         "nobias": {
-            "implicit": "~/results/chain/implicit/202102021131",
-            "explicit": "~/results/chain/explicit/202102021048",
+            "implicit": "~/results/chain/implicit/202102021347",
+            "explicit": "~/results/chain/explicit/202102021420",
         },
         "bias": {
-            "implicit": "~/results/chain/implicit/202102021128",
-            "explicit": "~/results/chain/explicit/202102021043",
+            "implicit": "~/results/chain/implicit/202102021424",
+            "explicit": "~/results/chain/explicit/202102021422",
         },
     },
     "four_rooms": {
@@ -144,9 +146,8 @@ def plot_implicit_and_explicit(prefix, paths, hparams, ylim):
         ylim=ylim,
         best_hparams=hparams["implicit"],
     )
-    fig.set_titles(row_template="$\eta = {row_name}$", col_template="Batch size = {col_name}")
-    fig.set_axis_labels("Iteration", "$||\mathbf{r}||_2$")
-    # fig._legend.set_title("Learning rate")
+    fig.set_titles(row_template=r"$\eta = {row_name}$", col_template="Batch size = {col_name}")
+    fig.set_axis_labels("Iteration", "r$||\mathbf{r}||_2$")
     fig._legend.texts[0].set_text("Learning rate")
     fig._legend.texts[-3].set_text("Best")
     fig.savefig(f"{prefix}_implicit_norm.pdf")
@@ -158,9 +159,8 @@ def plot_implicit_and_explicit(prefix, paths, hparams, ylim):
         ylim=ylim,
         best_hparams=hparams["explicit"],
     )
-    fig.set_titles(row_template="$\eta = {row_name}$", col_template="Batch size = {col_name}")
-    fig.set_axis_labels("Iteration", "$||\mathbf{r}||_2$")
-    # fig._legend.set_title("Learning rate")
+    fig.set_titles(row_template=r"$\eta = {row_name}$", col_template="Batch size = {col_name}")
+    fig.set_axis_labels("Iteration", r"$||\mathbf{r}||_2$")
     fig._legend.texts[0].set_text("Learning rate")
     fig._legend.texts[-3].set_text("Best")
     fig.savefig(f"{prefix}_explicit_norm.pdf")
@@ -176,8 +176,8 @@ def plot_implicit_and_explicit(prefix, paths, hparams, ylim):
         y="residual_norm",
         ylim=ylim,
     )
-    fig.set_titles(row_template="$\eta = {row_name}$", col_template="Batch size = {col_name}")
-    fig.set_axis_labels("Iteration", "$||\mathbf{r}||_2$")
+    fig.set_titles(row_template=r"$\eta = {row_name}$", col_template="Batch size = {col_name}")
+    fig.set_axis_labels("Iteration", r"$||\mathbf{r}||_2$")
     fig.savefig(f"{prefix}_compare_norm.pdf")
 
     fig = utils.plot_comparison(
@@ -186,8 +186,8 @@ def plot_implicit_and_explicit(prefix, paths, hparams, ylim):
         y="res_ones_norm",
         ylim=ylim,
     )
-    fig.set_titles(row_template="$\eta = {row_name}$", col_template="Batch size = {col_name}")
-    fig.set_axis_labels("Iteration", "$r^\parallel ( \\theta )$")
+    fig.set_titles(row_template=r"$\eta = {row_name}$", col_template="Batch size = {col_name}")
+    fig.set_axis_labels("Iteration", r"$r^\parallel ( \theta )$")
     fig.savefig(f"{prefix}_compare_ones_norm.pdf")
 
 
@@ -197,7 +197,7 @@ def plot_domain_results(domain, ylim):
         plot_implicit_and_explicit(prefix, paths, best_hparams[domain][use_bias], ylim)
 
 
-def load_joint_dataframe(paths, hparams, filter_dict, col_name):
+def load_joint_dataframe(paths, hparams, filter_dict):
     # filter by best hyper-parameters
     implicit_df = utils.load_results(paths["implicit"])
     explicit_df = utils.load_results(paths["explicit"])
@@ -210,20 +210,20 @@ def load_joint_dataframe(paths, hparams, filter_dict, col_name):
         best_explicit &= explicit_df[name] == val
 
     implicit_df = implicit_df[best_implicit].copy()
-    implicit_df[col_name] = "implicit"
+    implicit_df[COL_NAME] = "implicit"
     explicit_df = explicit_df[best_explicit].copy()
-    explicit_df[col_name] = "explicit"
+    explicit_df[COL_NAME] = "explicit"
 
     return pd.concat((implicit_df, explicit_df), ignore_index=True)
 
 
-def _plot_joint_data(data, y, col_name):
+def _plot_joint_data(data, y):
     fig = sns.relplot(
         data=data,
         x="timestep",
         y=y,
-        hue=col_name,
-        col="Domain",
+        hue=COL_NAME,
+        col="domain",
         kind="line",
         ci="sd",
         legend="full",
@@ -243,27 +243,67 @@ def _plot_joint_data(data, y, col_name):
 
 
 def plot_across_domains(use_bias, batch_size, eta):
-    col_name = "Parameterization"
     pretty_names = {"chain": "Chain", "four_rooms": "Four rooms", "mountain_car": "Mountain car"}
     filter_dict = {"BATCH_SIZE": batch_size, "MDP_MODULE_DISCOUNT": eta}
 
     plot_df = []
     for domain in results_path.keys():
         data = load_joint_dataframe(
-            results_path[domain][use_bias], best_hparams[domain][use_bias], filter_dict, col_name)
-        data["Domain"] = pretty_names[domain]
+            results_path[domain][use_bias], best_hparams[domain][use_bias], filter_dict)
+        data["domain"] = pretty_names[domain]
         plot_df.append(data)
 
     plot_df = pd.concat(plot_df, ignore_index=True)
 
-    fig = _plot_joint_data(plot_df, "res_ones_norm", col_name)
-    fig.set_axis_labels("Iteration", "$r^\parallel ( \\theta )$")
+    fig = _plot_joint_data(plot_df, "res_ones_norm")
+    fig.set_axis_labels("Iteration", r"$r^\parallel ( \theta )$")
     fig.savefig("ones_compare.pdf")
 
-    fig = _plot_joint_data(plot_df, "residual_norm", col_name)
-    fig.set_axis_labels("Iteration", "$||\mathbf{r}||_2$")
+    fig = _plot_joint_data(plot_df, "res_ortho_norm")
+    fig.set_axis_labels("Iteration", r"$||\mathbf{r}^\perp ( \theta )||_2$")
+    fig.savefig("ortho_compare.pdf")
+
+    fig = _plot_joint_data(plot_df, "residual_norm")
+    fig.set_axis_labels("Iteration", r"$||\mathbf{r}||_2$")
     fig.savefig("norm_compare.pdf")
 
+
+def _single_plot(data, y, ylim, ylabel):
+    fig = plt.figure()
+    ax = sns.lineplot(
+        data=data,
+        x="timestep",
+        y=y,
+        hue=COL_NAME,
+        ci="sd",
+        legend="full",
+    )
+    ax.set_xlabel("Iteration")
+    ax.set_ylabel(ylabel)
+    ax.set_ylim(ylim)
+    return fig
+
+
+def plot_single_comparison(domain, use_bias, batch_size, eta):
+    filter_dict = {"BATCH_SIZE": batch_size, "MDP_MODULE_DISCOUNT": eta}
+    data = load_joint_dataframe(
+        results_path[domain][use_bias], best_hparams[domain][use_bias], filter_dict)
+
+    prefix = f"single_{domain}_{use_bias}_{batch_size}_{eta}"
+
+    fig = _single_plot(data, "res_ones_norm", ylims[domain], r"$r^\parallel ( \theta )$")
+    fig.savefig(f"{prefix}_ones.pdf")
+
+    fig = _single_plot(
+        data, "res_ortho_norm", ylims[domain], r"$||\mathbf{r}^\perp ( \theta )||_2$")
+    fig.savefig(f"{prefix}_ortho.pdf")
+
+    fig = _single_plot(data, "residual_norm", ylims[domain], r"$||\mathbf{r}||_2$")
+    fig.savefig(f"{prefix}_norm.pdf")
+
+
+# load and plot a negative result showing high variance of implicit parameterization
+plot_single_comparison("chain", use_bias="nobias", batch_size=1, eta=0.95)
 
 # load and plot cross domain comparison of residual along the ones vector
 plot_across_domains(use_bias="nobias", batch_size=25, eta=0.8)
