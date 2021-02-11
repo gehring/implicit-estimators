@@ -10,7 +10,7 @@ All experiments are run with `python supervised.py` using different configuratio
 python supervised.py --gin_file PATH_TO_GIN_CONFIG_FILE
 ```
 
-We provide a bash script which can call `supervised.py` with a gridsearch like combination of parameters. This assumes you aare running with a recent version of linux and requires [GNU parallel](https://www.gnu.org/software/parallel/) to run. The learning rates are hardcoded in this script and don't necessarily reflect the learning rates tried. See the full plots of each domain to see the values of the learning rates tried.
+We provide a bash script which can call `supervised.py` with a gridsearch like combination of parameters. This assumes you are running with a recent version of linux and requires [GNU parallel](https://www.gnu.org/software/parallel/) to run. The learning rates are hardcoded in this script and don't necessarily reflect the learning rates tried. See the full plots of each domain to see the values of the learning rates tried. The first argument is the config for the method and the second is the config for the environment.
 
 Example for running the explicit parameterization on mountain car:
 ```commandline
