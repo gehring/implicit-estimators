@@ -8,6 +8,6 @@ numpy
 optax
 pandas
 rlax
-jax
-jaxlib
+jax==0.2.9
+jaxlib==0.1.60
 tjax==0.7.3
