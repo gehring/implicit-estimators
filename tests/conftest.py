@@ -54,6 +54,4 @@ def solver_offset(request):
 @pytest.fixture(scope="session")
 def value_solver(solver_cls, solver_reduce, solver_offset):
     solver = solver_cls(reduce=solver_reduce, offset=solver_offset)
-    # object.__setattr__(solver, "__call__", jax.jit(solver.__call__, static_argnums=0))
-
     return solver

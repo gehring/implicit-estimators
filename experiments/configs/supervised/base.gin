@@ -7,11 +7,6 @@ weights/ValueIteration.maxiter = 5000
 weights/ValueIteration.reduce = @max_reduce
 weights/ValueIteration.offset = @identity_offset
 
-weights/RelativeValueIteration.tol = %WEIGHTS_VI_TOL
-weights/RelativeValueIteration.maxiter = 5000
-weights/RelativeValueIteration.reduce = @max_reduce
-weights/RelativeValueIteration.offset = @fixed_offset
-
 weights/ExplicitMDP.num_pseudo_actions = 1
 weights/ExplicitMDP.discount_init = %MDP_MODULE_DISCOUNT
 

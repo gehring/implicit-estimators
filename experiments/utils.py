@@ -1,4 +1,3 @@
-import ast
 from concurrent import futures
 import glob
 import itertools
@@ -9,27 +8,7 @@ import pandas as pd
 import seaborn as sns
 
 
-def load_run_v1(run_dir, config_dir):
-    log_path = os.path.join(run_dir, "logs.csv")
-    config_path = os.path.join(config_dir, os.path.basename(run_dir) + ".gin")
-
-    try:
-        df = pd.read_csv(log_path)
-
-        with open(config_path, "r") as f:
-            lines = f.readlines()
-
-    except FileNotFoundError:
-        return None
-
-    for line in lines:
-        name, value = line.split("=")
-        df[name.strip()] = ast.literal_eval(value.strip())
-
-    return df
-
-
-def load_run_v2(run_dir, config_dir=None):
+def load_run(run_dir, config_dir=None):
     del config_dir
     run_dir = os.path.normpath(run_dir)
     run_id = int(os.path.basename(run_dir))
@@ -43,9 +22,6 @@ def load_run_v2(run_dir, config_dir=None):
     df["run_id"] = run_id
 
     return df
-
-
-load_run = load_run_v2
 
 
 def load_results(result_dir, config_dir=None):
@@ -62,6 +38,7 @@ def load_results(result_dir, config_dir=None):
         joblogs = joblogs.drop(
             columns=["Host", "Starttime", "JobRuntime", "Send", "Receive", "Exitval", "Signal",
                      "Command", "Stdout", "Stderr"],
+            errors="ignore",
         )
         df = df.merge(joblogs)
 

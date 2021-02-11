@@ -15,12 +15,8 @@ def init_log_transitions(key, num_states, num_actions, dtype):
     logprob = jnp.log(
         jax.random.dirichlet(key, jnp.ones(shape), dtype=dtype)
         + 2*jnp.eye(shape[2])[:, None, :]
-    )  # + 3 * jnp.eye(shape[2])[:, None, :]
+    )
     return logprob - jnp.max(logprob, axis=-1)[..., None]
-    # logprob = jnp.log(jax.random.dirichlet(key, jnp.ones(shape), dtype=dtype) + jnp.eye(shape[2])[:, None, :]) # + 3 * jnp.eye(shape[2])[:, None, :]
-    # return logprob - jnp.max(logprob, axis=-1)[..., None]
-    # return (2 * jnp.eye(shape[2])[:, None, :]
-    #         + jnp.exp(0.1 * jax.random.normal(key, shape, dtype=dtype)))
 
 
 def init_rewards(key, num_states, num_actions, dtype):
@@ -40,7 +36,7 @@ class ExplicitMDP(Module[DenseMDP]):
     num_pseudo_actions: int
     rewards_init: Callable = tjax.field(default=init_rewards, static=True)  # type: ignore
     log_transition_init: Callable = tjax.field(default=init_log_transitions, static=True)  # type: ignore  # noqa: E501
-    discount_init: Union[Callable, RealArray] = tjax.field(static=True)
+    discount_init: Union[Callable, RealArray] = tjax.field(static=True)  # type: ignore  # noqa: E501
 
     def init(self, rng, inputs):
         num_states = inputs.shape[-1]
@@ -55,9 +51,6 @@ class ExplicitMDP(Module[DenseMDP]):
         if callable(self.discount_init):
             discounts = self.discount_init(
                 discount_key, num_states, self.num_pseudo_actions, inputs.dtype)
-        #     rewards / (1 - discounts)
-        # else:
-        #     rewards / (1 - self.discount_init)
 
         return MDPParams(rewards, log_transitions, discounts)
 
@@ -69,7 +62,6 @@ class ExplicitMDP(Module[DenseMDP]):
 
         return DenseMDP(
             rewards,
-            # rewards * (1 - discounts),
             DenseLogits(log_transitions),
             discounts
         )

@@ -1,0 +1,146 @@
+import mountaincar.configurables
+
+# Macros:
+# ==============================================================================
+BATCH_SIZE = 25
+LEARNING_RATE = 0.125
+MDP_MODULE_DISCOUNT = 0.95
+SEED = 1111384852
+WEIGHTS_VI_TOL = 1e-06
+
+# Parameters for batch_generator:
+# ==============================================================================
+batch_generator.batch_size = %BATCH_SIZE
+batch_generator.replace = True
+
+# Parameters for dataset_factory:
+# ==============================================================================
+dataset_factory.test_dataset_cls = @test/rollout_dataset
+dataset_factory.train_dataset_cls = @train/rollout_dataset
+
+# Parameters for weights/ExplicitMDP:
+# ==============================================================================
+weights/ExplicitMDP.discount_init = %MDP_MODULE_DISCOUNT
+weights/ExplicitMDP.num_pseudo_actions = 1
+
+# Parameters for identity_offset:
+# ==============================================================================
+# None.
+
+# Parameters for launch:
+# ==============================================================================
+launch.data_factory = @dataset_factory
+launch.seed = %SEED
+
+# Parameters for LinearModule:
+# ==============================================================================
+LinearModule.encoder = @RBFEncoder()
+LinearModule.use_bias = False
+LinearModule.weight_module = @MDPSolveWeights()
+
+# Parameters for max_reduce:
+# ==============================================================================
+# None.
+
+# Parameters for MDPSolveWeights:
+# ==============================================================================
+MDPSolveWeights.mdp_module = @weights/ExplicitMDP()
+MDPSolveWeights.solver = @weights/ValueIteration()
+
+# Parameters for MountainCar:
+# ==============================================================================
+MountainCar.force = 0.001
+MountainCar.goal_pos = 0.5
+MountainCar.gravity = 0.0025
+MountainCar.max_init_pos = -0.4
+MountainCar.max_pos = 0.6
+MountainCar.max_speed = 0.07
+MountainCar.min_init_pos = -0.6
+MountainCar.min_pos = -1.2
+MountainCar.seed = None
+
+# Parameters for test/MountainCar:
+# ==============================================================================
+test/MountainCar.force = 0.001
+test/MountainCar.goal_pos = 0.5
+test/MountainCar.gravity = 0.0025
+test/MountainCar.max_init_pos = -0.4
+test/MountainCar.max_pos = 0.6
+test/MountainCar.max_speed = 0.07
+test/MountainCar.min_init_pos = -0.6
+test/MountainCar.min_pos = -1.2
+
+# Parameters for train/MountainCar:
+# ==============================================================================
+train/MountainCar.force = 0.001
+train/MountainCar.goal_pos = 0.5
+train/MountainCar.gravity = 0.0025
+train/MountainCar.max_init_pos = -0.4
+train/MountainCar.max_pos = 0.6
+train/MountainCar.max_speed = 0.07
+train/MountainCar.min_init_pos = -0.6
+train/MountainCar.min_pos = -1.2
+
+# Parameters for test/MountainCarPolicy:
+# ==============================================================================
+test/MountainCarPolicy.epsilon = 0.1
+
+# Parameters for train/MountainCarPolicy:
+# ==============================================================================
+train/MountainCarPolicy.epsilon = 0.1
+
+# Parameters for normalized_scales:
+# ==============================================================================
+normalized_scales.env = @MountainCar()
+normalized_scales.scale = 0.1
+
+# Parameters for RBFEncoder:
+# ==============================================================================
+RBFEncoder.centers = @uniform_centers()
+RBFEncoder.normalized = True
+RBFEncoder.scales = @normalized_scales()
+
+# Parameters for test/rollout_dataset:
+# ==============================================================================
+test/rollout_dataset.discount = 0.99
+test/rollout_dataset.env_cls = @MountainCar
+test/rollout_dataset.max_traj_length = 200
+test/rollout_dataset.num_steps = 1000
+test/rollout_dataset.num_traj = None
+test/rollout_dataset.policy = @MountainCarPolicy()
+test/rollout_dataset.use_partial_traj = True
+
+# Parameters for train/rollout_dataset:
+# ==============================================================================
+train/rollout_dataset.discount = 0.99
+train/rollout_dataset.env_cls = @MountainCar
+train/rollout_dataset.max_traj_length = 200
+train/rollout_dataset.num_steps = None
+train/rollout_dataset.num_traj = 10
+train/rollout_dataset.policy = @MountainCarPolicy()
+train/rollout_dataset.use_partial_traj = True
+
+# Parameters for sgd:
+# ==============================================================================
+sgd.learning_rate = %LEARNING_RATE
+sgd.momentum = 0.0
+sgd.nesterov = False
+
+# Parameters for train:
+# ==============================================================================
+train.eval_period = 10
+train.model = @LinearModule()
+train.num_iterations = 300
+train.optimizer = @sgd()
+
+# Parameters for uniform_centers:
+# ==============================================================================
+uniform_centers.centers_per_dim = 20
+uniform_centers.env = @MountainCar()
+
+# Parameters for weights/ValueIteration:
+# ==============================================================================
+weights/ValueIteration.maxiter = 5000
+weights/ValueIteration.offset = @identity_offset
+weights/ValueIteration.reduce = @max_reduce
+weights/ValueIteration.tol = %WEIGHTS_VI_TOL

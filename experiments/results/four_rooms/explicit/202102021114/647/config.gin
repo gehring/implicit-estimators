@@ -1,0 +1,89 @@
+import four_rooms.configurables
+
+# Macros:
+# ==============================================================================
+BATCH_SIZE = 25
+LEARNING_RATE = 0.0625
+MDP_MODULE_DISCOUNT = 0.95
+SEED = 2034693659
+WEIGHTS_VI_TOL = 1e-06
+
+# Parameters for batch_generator:
+# ==============================================================================
+batch_generator.batch_size = %BATCH_SIZE
+batch_generator.replace = True
+
+# Parameters for create_four_rooms:
+# ==============================================================================
+create_four_rooms.discount = 0.9
+create_four_rooms.fail_prob = 0.3333333333333333
+create_four_rooms.goal = (7, 1)
+
+# Parameters for weights/ExplicitMDP:
+# ==============================================================================
+weights/ExplicitMDP.discount_init = %MDP_MODULE_DISCOUNT
+weights/ExplicitMDP.num_pseudo_actions = 1
+
+# Parameters for ExplicitWeights:
+# ==============================================================================
+ExplicitWeights.implicit_module = @MDPSolveWeights()
+
+# Parameters for identity_offset:
+# ==============================================================================
+# None.
+
+# Parameters for launch:
+# ==============================================================================
+launch.data_factory = @mdp_data_factory
+launch.seed = %SEED
+
+# Parameters for LinearModule:
+# ==============================================================================
+LinearModule.encoder = None
+LinearModule.use_bias = False
+LinearModule.weight_module = @ExplicitWeights()
+
+# Parameters for max_reduce:
+# ==============================================================================
+# None.
+
+# Parameters for mdp_data_factory:
+# ==============================================================================
+mdp_data_factory.data = @supervised_mdp_dataset()
+
+# Parameters for MDPSolveWeights:
+# ==============================================================================
+MDPSolveWeights.mdp_module = @weights/ExplicitMDP()
+MDPSolveWeights.solver = @weights/ValueIteration()
+
+# Parameters for sgd:
+# ==============================================================================
+sgd.learning_rate = %LEARNING_RATE
+sgd.momentum = 0.0
+sgd.nesterov = False
+
+# Parameters for supervised_mdp_dataset:
+# ==============================================================================
+supervised_mdp_dataset.mdp = @create_four_rooms()
+supervised_mdp_dataset.value_solver = @dataset/ValueIteration()
+
+# Parameters for train:
+# ==============================================================================
+train.eval_period = 10
+train.model = @LinearModule()
+train.num_iterations = 300
+train.optimizer = @sgd()
+
+# Parameters for dataset/ValueIteration:
+# ==============================================================================
+dataset/ValueIteration.maxiter = 10000
+dataset/ValueIteration.offset = @identity_offset
+dataset/ValueIteration.reduce = @max_reduce
+dataset/ValueIteration.tol = 1e-06
+
+# Parameters for weights/ValueIteration:
+# ==============================================================================
+weights/ValueIteration.maxiter = 5000
+weights/ValueIteration.offset = @identity_offset
+weights/ValueIteration.reduce = @max_reduce
+weights/ValueIteration.tol = %WEIGHTS_VI_TOL

@@ -1,5 +1,7 @@
+import os
+
 import seaborn as sns
-import matplotlib.pyplot as plt
+from matplotlib import transforms
 
 import pandas as pd
 
@@ -8,6 +10,7 @@ from experiments import utils
 sns.set_theme()
 
 COL_NAME = "Parameterization"
+FIG_DIR = "figures"
 
 ylims = {
     "chain": (0., 40.),
@@ -18,32 +21,32 @@ ylims = {
 results_path = {
     "chain": {
         "nobias": {
-            "implicit": "~/results/chain/implicit/202102021347",
-            "explicit": "~/results/chain/explicit/202102021420",
+            "implicit": "results/chain/implicit/202102021347",
+            "explicit": "results/chain/explicit/202102021420",
         },
         "bias": {
-            "implicit": "~/results/chain/implicit/202102021424",
-            "explicit": "~/results/chain/explicit/202102021422",
+            "implicit": "results/chain/implicit/202102021424",
+            "explicit": "results/chain/explicit/202102021422",
         },
     },
     "four_rooms": {
         "nobias": {
-            "implicit": "~/results/four_rooms/implicit/202102021111",
-            "explicit": "~/results/four_rooms/explicit/202102021114",
+            "implicit": "results/four_rooms/implicit/202102021111",
+            "explicit": "results/four_rooms/explicit/202102021114",
         },
         "bias": {
-            "implicit": "~/results/four_rooms/implicit/202102021120",
-            "explicit": "~/results/four_rooms/explicit/202102021124",
+            "implicit": "results/four_rooms/implicit/202102021120",
+            "explicit": "results/four_rooms/explicit/202102021124",
         },
     },
     "mountain_car": {
         "nobias": {
-            "implicit": "~/results/mountaincar/implicit/202102020536",
-            "explicit": "~/results/mountaincar/explicit/202102020608",
+            "implicit": "results/mountaincar/implicit/202102020536",
+            "explicit": "results/mountaincar/explicit/202102020608",
         },
         "bias": {
-            "implicit": "~/results/mountaincar/implicit/202102020737",
-            "explicit": "~/results/mountaincar/explicit/202102020835",
+            "implicit": "results/mountaincar/implicit/202102020737",
+            "explicit": "results/mountaincar/explicit/202102020835",
         },
     },
 }
@@ -150,7 +153,7 @@ def plot_implicit_and_explicit(prefix, paths, hparams, ylim):
     fig.set_axis_labels("Iteration", "r$||\mathbf{r}||_2$")
     fig._legend.texts[0].set_text("Learning rate")
     fig._legend.texts[-3].set_text("Best")
-    fig.savefig(f"{prefix}_implicit_norm.pdf")
+    fig.savefig(os.path.join(FIG_DIR, f"{prefix}_implicit_norm.pdf"))
 
     # load and plot explicit chain results
     explicit_df = utils.load_results(paths["explicit"])
@@ -163,7 +166,7 @@ def plot_implicit_and_explicit(prefix, paths, hparams, ylim):
     fig.set_axis_labels("Iteration", r"$||\mathbf{r}||_2$")
     fig._legend.texts[0].set_text("Learning rate")
     fig._legend.texts[-3].set_text("Best")
-    fig.savefig(f"{prefix}_explicit_norm.pdf")
+    fig.savefig(os.path.join(FIG_DIR, f"{prefix}_explicit_norm.pdf"))
 
     # filter by best hyper-parameters
     best_implicit = utils.compute_best_mask(implicit_df, hparams["implicit"])
@@ -178,7 +181,7 @@ def plot_implicit_and_explicit(prefix, paths, hparams, ylim):
     )
     fig.set_titles(row_template=r"$\eta = {row_name}$", col_template="Batch size = {col_name}")
     fig.set_axis_labels("Iteration", r"$||\mathbf{r}||_2$")
-    fig.savefig(f"{prefix}_compare_norm.pdf")
+    fig.savefig(os.path.join(FIG_DIR, f"{prefix}_compare_norm.pdf"))
 
     fig = utils.plot_comparison(
         implicit_df[best_implicit],
@@ -188,7 +191,7 @@ def plot_implicit_and_explicit(prefix, paths, hparams, ylim):
     )
     fig.set_titles(row_template=r"$\eta = {row_name}$", col_template="Batch size = {col_name}")
     fig.set_axis_labels("Iteration", r"$r^\parallel ( \theta )$")
-    fig.savefig(f"{prefix}_compare_ones_norm.pdf")
+    fig.savefig(os.path.join(FIG_DIR, f"{prefix}_compare_ones_norm.pdf"))
 
 
 def plot_domain_results(domain, ylim):
@@ -257,30 +260,49 @@ def plot_across_domains(use_bias, batch_size, eta):
 
     fig = _plot_joint_data(plot_df, "res_ones_norm")
     fig.set_axis_labels("Iteration", r"$r^\parallel ( \theta )$")
-    fig.savefig("ones_compare.pdf")
+    fig.savefig(os.path.join(FIG_DIR, "ones_compare.pdf"))
 
     fig = _plot_joint_data(plot_df, "res_ortho_norm")
     fig.set_axis_labels("Iteration", r"$||\mathbf{r}^\perp ( \theta )||_2$")
-    fig.savefig("ortho_compare.pdf")
+    fig.savefig(os.path.join(FIG_DIR, "ortho_compare.pdf"))
 
     fig = _plot_joint_data(plot_df, "residual_norm")
     fig.set_axis_labels("Iteration", r"$||\mathbf{r}||_2$")
-    fig.savefig("norm_compare.pdf")
+    fig.savefig(os.path.join(FIG_DIR, "norm_compare.pdf"))
 
 
-def _single_plot(data, y, ylim, ylabel):
-    fig = plt.figure()
-    ax = sns.lineplot(
+def _single_plot(data, y, ylim, ylabel, legend=False, skip_padding=False):
+    fig = sns.relplot(
         data=data,
         x="timestep",
         y=y,
         hue=COL_NAME,
         ci="sd",
-        legend="full",
+        legend=legend,
+        kind="line",
+        facet_kws={"ylim": ylim},
     )
-    ax.set_xlabel("Iteration")
-    ax.set_ylabel(ylabel)
-    ax.set_ylim(ylim)
+    fig.set_axis_labels("Iteration", ylabel)
+
+    layout_rect = [0, .01, .99, .99]
+    fig.fig.tight_layout(pad=0.5, rect=layout_rect)
+    if not legend and not skip_padding:
+        xax = fig.fig.axes[0].get_xaxis()
+        bb = xax.get_tightbbox(fig.fig.canvas.get_renderer())
+        pad = bb.xmin/fig.fig.dpi - (fig.fig.get_figwidth() - bb.xmax/fig.fig.dpi)
+
+        fig.fig.set_figwidth(fig.fig.get_figwidth() + pad)
+        fig.fig.subplots_adjust(right=1 - pad/fig.fig.get_figwidth())
+        layout_rect[2] = 1 - pad/fig.fig.get_figwidth()
+
+        fig.fig.tight_layout(pad=0.5, rect=layout_rect)
+        fig.fig.canvas.draw()
+        if fig.fig.stale:
+            try:
+                fig.fig.draw(fig.fig.canvas.get_renderer())
+            except AttributeError:
+                pass
+
     return fig
 
 
@@ -292,15 +314,48 @@ def plot_single_comparison(domain, use_bias, batch_size, eta):
     prefix = f"single_{domain}_{use_bias}_{batch_size}_{eta}"
 
     fig = _single_plot(data, "res_ones_norm", ylims[domain], r"$r^\parallel ( \theta )$")
-    fig.savefig(f"{prefix}_ones.pdf")
-
-    fig = _single_plot(
-        data, "res_ortho_norm", ylims[domain], r"$||\mathbf{r}^\perp ( \theta )||_2$")
-    fig.savefig(f"{prefix}_ortho.pdf")
+    fig.savefig(os.path.join(FIG_DIR, f"{prefix}_ones.pdf"), bbox_inches=None)
 
     fig = _single_plot(data, "residual_norm", ylims[domain], r"$||\mathbf{r}||_2$")
-    fig.savefig(f"{prefix}_norm.pdf")
+    fig.savefig(os.path.join(FIG_DIR, f"{prefix}_norm.pdf"), bbox_inches=None)
 
+    fig = _single_plot(
+        data,
+        "res_ortho_norm",
+        ylims[domain],
+        r"$||\mathbf{r}^\perp ( \theta )||_2$",
+    )
+    fig.savefig(os.path.join(FIG_DIR, f"{prefix}_ortho.pdf"), bbox_inches=None)
+
+    fig = _single_plot(
+        data,
+        "res_ortho_norm",
+        ylims[domain],
+        r"$||\mathbf{r}^\perp ( \theta )||_2$",
+        legend="full",
+    )
+    legend = fig.legend
+    bb = legend.get_window_extent().transformed(fig.fig.dpi_scale_trans.inverted())
+    bb = transforms.Bbox.from_extents(bb.xmin - 0.1, 0, bb.xmax, fig.fig.get_figheight())
+    fig.fig.axes[0].remove()
+    fig.savefig(os.path.join(FIG_DIR, "legend.pdf"), bbox_inches=bb)
+
+
+def plot_split_domain_comparison(use_bias, batch_size, eta):
+    pretty_names = {"chain": "Chain", "four_rooms": "Four rooms", "mountain_car": "Mountain car"}
+    filter_dict = {"BATCH_SIZE": batch_size, "MDP_MODULE_DISCOUNT": eta}
+    suffix = f"{use_bias}_{batch_size}_{eta}"
+
+    for domain in results_path.keys():
+        data = load_joint_dataframe(
+            results_path[domain][use_bias], best_hparams[domain][use_bias], filter_dict)
+
+        fig = _single_plot(data, "residual_norm", ylims[domain], r"$||\mathbf{r}||_2$",
+                           legend="full", skip_padding=True)
+        fig.savefig(os.path.join(FIG_DIR, f"compare_norm_{suffix}_{domain}.pdf"))
+
+
+# plot_split_domain_comparison(use_bias="nobias", batch_size=25, eta=0.8)
 
 # load and plot a negative result showing high variance of implicit parameterization
 plot_single_comparison("chain", use_bias="nobias", batch_size=1, eta=0.95)
