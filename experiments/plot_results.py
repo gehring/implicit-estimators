@@ -19,7 +19,7 @@ results_path = {
     "chain": {
         "nobias": {
             "implicit": "~/results/chain/implicit/202102021347",
-            "explicit": "~/results/chain/explicit/202102021420",
+            "explicit": "~/results/chain/explicit/202103241120",
         },
         "bias": {
             "implicit": "~/results/chain/implicit/202102021424",
@@ -28,8 +28,8 @@ results_path = {
     },
     "four_rooms": {
         "nobias": {
-            "implicit": "~/results/four_rooms/implicit/202102021111",
-            "explicit": "~/results/four_rooms/explicit/202102021114",
+            "implicit": "~/results/four_rooms/implicit/202103241239",
+            "explicit": "~/results/four_rooms/explicit/202103241122/",
         },
         "bias": {
             "implicit": "~/results/four_rooms/implicit/202102021120",
@@ -38,8 +38,8 @@ results_path = {
     },
     "mountain_car": {
         "nobias": {
-            "implicit": "~/results/mountaincar/implicit/202102020536",
-            "explicit": "~/results/mountaincar/explicit/202102020608",
+            "implicit": "~/results/mountaincar/implicit/202103241207",
+            "explicit": "~/results/mountaincar/explicit/202103241124",
         },
         "bias": {
             "implicit": "~/results/mountaincar/implicit/202102020737",
@@ -61,8 +61,8 @@ best_hparams = {
                          {"BATCH_SIZE": 25, "MDP_MODULE_DISCOUNT": 0.9, "LEARNING_RATE": 0.125},
                          {"BATCH_SIZE": 25, "MDP_MODULE_DISCOUNT": 0.95, "LEARNING_RATE": 0.03125}],
             "explicit": [{"BATCH_SIZE": 1, "LEARNING_RATE": 1.},
-                         {"BATCH_SIZE": 5, "LEARNING_RATE": 2.},
-                         {"BATCH_SIZE": 25, "LEARNING_RATE": 2.}],
+                         {"BATCH_SIZE": 5, "LEARNING_RATE": 4.},
+                         {"BATCH_SIZE": 25, "LEARNING_RATE": 8.}],
         },
         "bias": {
             "implicit": [{"BATCH_SIZE": 1, "MDP_MODULE_DISCOUNT": 0.8, "LEARNING_RATE": 0.125},
@@ -87,12 +87,12 @@ best_hparams = {
                          {"BATCH_SIZE": 5, "MDP_MODULE_DISCOUNT": 0.8, "LEARNING_RATE": 1.0},
                          {"BATCH_SIZE": 5, "MDP_MODULE_DISCOUNT": 0.9, "LEARNING_RATE": 0.5},
                          {"BATCH_SIZE": 5, "MDP_MODULE_DISCOUNT": 0.95, "LEARNING_RATE": 0.25},
-                         {"BATCH_SIZE": 25, "MDP_MODULE_DISCOUNT": 0.8, "LEARNING_RATE": 2.},
+                         {"BATCH_SIZE": 25, "MDP_MODULE_DISCOUNT": 0.8, "LEARNING_RATE": 4.},
                          {"BATCH_SIZE": 25, "MDP_MODULE_DISCOUNT": 0.9, "LEARNING_RATE": 2.},
                          {"BATCH_SIZE": 25, "MDP_MODULE_DISCOUNT": 0.95, "LEARNING_RATE": 0.5}],
             "explicit": [{"BATCH_SIZE": 1, "LEARNING_RATE": 1.},
-                         {"BATCH_SIZE": 5, "LEARNING_RATE": 2.},
-                         {"BATCH_SIZE": 25, "LEARNING_RATE": 2.}],
+                         {"BATCH_SIZE": 5, "LEARNING_RATE": 4.},
+                         {"BATCH_SIZE": 25, "LEARNING_RATE": 16.}],
         },
         "bias": {
             "implicit": [{"BATCH_SIZE": 1, "MDP_MODULE_DISCOUNT": 0.8, "LEARNING_RATE": 0.125},
@@ -114,13 +114,15 @@ best_hparams = {
             "implicit": [{"BATCH_SIZE": 1, "MDP_MODULE_DISCOUNT": 0.8, "LEARNING_RATE": 1.},
                          {"BATCH_SIZE": 1, "MDP_MODULE_DISCOUNT": 0.9, "LEARNING_RATE": 0.25},
                          {"BATCH_SIZE": 1, "MDP_MODULE_DISCOUNT": 0.95, "LEARNING_RATE": 0.125},
-                         {"BATCH_SIZE": 5, "MDP_MODULE_DISCOUNT": 0.8, "LEARNING_RATE": 2.},
+                         {"BATCH_SIZE": 5, "MDP_MODULE_DISCOUNT": 0.8, "LEARNING_RATE": 4},
                          {"BATCH_SIZE": 5, "MDP_MODULE_DISCOUNT": 0.9, "LEARNING_RATE": 1.},
-                         {"BATCH_SIZE": 5, "MDP_MODULE_DISCOUNT": 0.95, "LEARNING_RATE": 0.25},
-                         {"BATCH_SIZE": 25, "MDP_MODULE_DISCOUNT": 0.8, "LEARNING_RATE": 2.},
-                         {"BATCH_SIZE": 25, "MDP_MODULE_DISCOUNT": 0.9, "LEARNING_RATE": 2.},
-                         {"BATCH_SIZE": 25, "MDP_MODULE_DISCOUNT": 0.95, "LEARNING_RATE": 0.5}],
-            "explicit": [{"LEARNING_RATE": 2.}],
+                         {"BATCH_SIZE": 5, "MDP_MODULE_DISCOUNT": 0.95, "LEARNING_RATE": 0.5},
+                         {"BATCH_SIZE": 25, "MDP_MODULE_DISCOUNT": 0.8, "LEARNING_RATE": 4},
+                         {"BATCH_SIZE": 25, "MDP_MODULE_DISCOUNT": 0.9, "LEARNING_RATE": 2},
+                         {"BATCH_SIZE": 25, "MDP_MODULE_DISCOUNT": 0.95, "LEARNING_RATE": 1.}],
+            "explicit": [{"BATCH_SIZE": 1, "LEARNING_RATE": 16},
+                         {"BATCH_SIZE": 5, "LEARNING_RATE": 32},
+                         {"BATCH_SIZE": 25, "LEARNING_RATE": 32}],
         },
         "bias": {
             "implicit": [{"BATCH_SIZE": 1, "MDP_MODULE_DISCOUNT": 0.8, "LEARNING_RATE": 0.5},

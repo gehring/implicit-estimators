@@ -30,7 +30,7 @@ parallel --nice 10 --memfree 3G --linebuffer --shuf --joblog $results_dir/joblog
       --gin_param MDP_MODULE_DISCOUNT={MDP_MODULE_DISCOUNT} \
       --results_dir $results_dir/{#}/" \
     ::: SEED $SEEDS \
-    ::: LEARNING_RATE $(for i in {0..4}; do bc -l <<< "2^(-$i + 2)"; done) \
+    ::: LEARNING_RATE $(for i in {0..5}; do bc -l <<< "2^(-$i + 2)"; done) \
     ::: BATCH_SIZE 1 5 25 \
     ::: MDP_MODULE_DISCOUNT 0.8 0.9 0.95
 
