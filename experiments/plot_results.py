@@ -1,9 +1,15 @@
+import os
+
 import seaborn as sns
 import matplotlib.pyplot as plt
 
 import pandas as pd
 
 from experiments import utils
+
+RESULT_DIR = "./"
+FIG_DIR = "figures"
+COL_NAME = "Parameterization"
 
 font_color = "black"
 sns.set_theme(
@@ -13,12 +19,6 @@ sns.set_theme(
         "xtick.color": font_color,
         "ytick.color": font_color},
 )
-
-# need to rerun:
-# - mountain car implicit lr: 0.125 - 4.
-# - mountain car explicit lr: 0.25 - 8.
-
-COL_NAME = "Parameterization"
 
 ylims = {
     "chain_rollout": (0., 15.),
@@ -67,13 +67,14 @@ PRETTY_DOMAIN_NAMES = {
     "mountaincar": "Mountain Car",
 }
 
-result_path = "~/results/{domain}/{method}/{id:d}"
+result_path = "{dir}/results/{domain}/{method}/{id:d}"
 
 
 def load_all_results(run_ids):
     results = {}
     for domain, method in run_ids:
-        path = result_path.format(domain=domain, method=method, id=run_ids[(domain, method)])
+        path = result_path.format(
+            dir=RESULT_DIR, domain=domain, method=method, id=run_ids[(domain, method)])
         df = utils.load_results(path)
         results[(domain, method)] = df
 
@@ -133,7 +134,7 @@ def plot_start_residual(results,
     )
     fig.set_titles(col_template=r"{col_name}")
     fig.set_axis_labels("Reward Offset", r" ")
-    fig.savefig(f"initial_norm.pdf")
+    fig.savefig(os.path.join(FIG_DIR, f"initial_norm.pdf"))
 
 
 def plot_all_end_residual(results, use_bias=False, batch_size=25, palette=None):
@@ -175,7 +176,7 @@ def plot_all_end_residual(results, use_bias=False, batch_size=25, palette=None):
             )
             fig.set_titles(col_template=r"$\eta = {col_name}$")
             fig.set_axis_labels("Reward Offset", r"$||\mathbf{r}||_2$")
-            fig.savefig(f"{method}_{domain}_norm.pdf")
+            fig.savefig(os.path.join(FIG_DIR, f"{method}_{domain}_norm.pdf"))
 
 
 def plot_all_eta_compare_residual(results, use_bias=False, batch_size=25, palette=None):
@@ -221,7 +222,7 @@ def plot_all_eta_compare_residual(results, use_bias=False, batch_size=25, palett
         )
         fig.set_titles(col_template=r"$\eta = {col_name}$")
         fig.set_axis_labels("Reward Offset", r"$||\mathbf{r}||_2$")
-        fig.savefig(f"compare_{domain}_norm.pdf")
+        fig.savefig(os.path.join(FIG_DIR, f"compare_{domain}_norm.pdf"))
 
 
 def plot_compare_end_residual(results, use_bias=False, batch_size=25, eta=0.95, palette=None):
@@ -268,7 +269,7 @@ def plot_compare_end_residual(results, use_bias=False, batch_size=25, eta=0.95, 
     )
     fig.set_titles(col_template=r"{col_name}")
     fig.set_axis_labels("Reward Offset", r"$||\mathbf{r}||_2$")
-    fig.savefig(f"compare_norm.pdf")
+    fig.savefig(os.path.join(FIG_DIR, f"compare_norm.pdf"))
 
 
 def _annotate_true_discount(data, **kwargs):
@@ -337,7 +338,7 @@ def plot_eta_end_residual(results, use_bias=False, batch_size=25, palette=None):
     g.set_titles(col_template=r"{col_name}")
     g.set_axis_labels(r"$\eta$", r"$||\mathbf{r}||_2$")
 
-    g.savefig(f"eta_norm.pdf")
+    g.savefig(os.path.join(FIG_DIR, f"eta_norm.pdf"))
 
 
 print("Loading data...")
