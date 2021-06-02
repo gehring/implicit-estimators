@@ -1,0 +1,13 @@
+absl-py
+chex
+dm-env
+gin-config
+matplotlib
+seaborn
+numpy
+optax
+pandas
+rlax
+jax
+jaxlib
+tjax==0.7.3

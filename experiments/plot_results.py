@@ -27,13 +27,12 @@ ylims = {
 }
 
 RUN_IDS = {
-    ("chain_rollout", "explicit"): 202105202021,
-    ("chain_rollout", "implicit"): 202105261803,
-    # ("chain_rollout", "implicit"): 202105221803,
-    ("four_rooms_rollout", "explicit"): 202105241245,
-    ("four_rooms_rollout", "implicit"): 202105231238,
-    ("mountaincar", "explicit"): 202105261546,
-    ("mountaincar", "implicit"): 202105261313,
+    ("chain_rollout", "explicit"): 202106021224,
+    ("chain_rollout", "implicit"): 202106021312,
+    ("four_rooms_rollout", "explicit"): 202106021401,
+    ("four_rooms_rollout", "implicit"): 202106021544,
+    ("mountaincar", "explicit"): 202106021459,
+    ("mountaincar", "implicit"): 202106021646,
 }
 
 BEST_HPARAMS = {

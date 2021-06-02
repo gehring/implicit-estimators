@@ -9,6 +9,6 @@ setup(
     version='0.0.1',
     python_requires='==3.*,>=3.8.0',
     packages=find_packages(
-        exclude=['additional'],
+        exclude=['experiments'],
     ),
 )
