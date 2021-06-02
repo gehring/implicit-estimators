@@ -20,9 +20,12 @@ class LinearModule(Module):
         if self.encoder is not None:
             inputs = self.encoder.apply(inputs)
 
-        params = self.weight_module.init(key, inputs)
         if self.use_bias:
-            params = (params, jnp.zeros((), dtype=inputs.dtype))
+            inputs = jnp.concatenate((inputs, jnp.ones_like(inputs[..., :1])), axis=-1)
+
+        params = self.weight_module.init(key, inputs)
+        # if self.use_bias:
+        #     params = (params, jnp.zeros((), dtype=inputs.dtype))
 
         return params
 
@@ -30,13 +33,16 @@ class LinearModule(Module):
         if self.encoder is not None:
             inputs = self.encoder.apply(inputs)
 
-        bias = None
+        # bias = None
+        # if self.use_bias:
+        #     params, bias = params
+
         if self.use_bias:
-            params, bias = params
+            inputs = jnp.concatenate((inputs, jnp.ones_like(inputs[..., :1])), axis=-1)
 
         weights = self.weight_module.apply(params, inputs)
         output = inputs @ weights
 
-        if bias is not None:
-            output = output + bias
+        # if bias is not None:
+        #     output = output + bias
         return output

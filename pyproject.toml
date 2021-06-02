@@ -7,8 +7,8 @@ license = "MIT"
 
 [tool.poetry.dependencies]
 python = "^3.8"
-jax = {path = "../../repos/jax/", develop = true}
-jaxlib = {path = "../../repos/jax/dist/jaxlib-0.1.60-cp38-none-manylinux2010_x86_64.whl"}
+jax = "^0.2.13"
+jaxlib = "^0.1.66"
 numpy = "^1.19.1"
 fax = {git = "https://github.com/gehring/fax.git"}
 rlax = "^0.0.2"
@@ -32,11 +32,11 @@ seaborn = "^0.11.0"
 [tool.isort]
 line_length = 100
 known_first_party = ["imprl"]
-known_third_party = ["fax", "jax", "tjax"]
+known_third_party = ["jax", "tjax"]
 multi_line_output = 0
 skip = []
 
 
-[build-system]
-requires = ["poetry>=0.12"]
-build-backend = "poetry.masonry.api"
+#[build-system]
+#requires = ["poetry>=0.12"]
+#build-backend = "poetry.masonry.api"

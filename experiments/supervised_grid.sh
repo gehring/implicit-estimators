@@ -12,64 +12,28 @@ agent_name=$(basename $agent_config_path .gin)
 env_config_path=$2
 env_name=$(basename $env_config_path .gin)
 
-results_dir=${3:-"${HOME}/results"}/$env_name/$agent_name/$(date +%Y%m%d%H%M)
+lr_offset=$3
 
-#export XLA_FLAGS="--xla_cpu_multi_thread_eigen=true intra_op_parallelism_threads=2"
-#export JAX_ENABLE_X64=True
+results_dir=${4:-"${HOME}/results"}/$env_name/$agent_name/$(date +%Y%m%d%H%M)
+
+export JAX_ENABLE_X64=True
 
 mkdir -p $results_dir
 
-# -j16 "'$(( 2*({%} - 1 )))-$(( 2*({%} - 1 ) + 1))'"
-parallel --nice 10 --memfree 3G --linebuffer --shuf --joblog $results_dir/joblog --header : --results $results_dir/results.csv \
-    "taskset -c "'$(({%} - 1 ))'" python supervised.py \
+parallel --nice 10 --memfree 3G --linebuffer --shuf --retries 3 --joblog $results_dir/joblog --header : --results $results_dir/results.csv \
+    "taskset -c "'$(({%} - 1 ))'" ./run_supervised.sh \
       --gin_file $agent_config_path \
       --gin_file $env_config_path \
       --gin_param SEED={SEED} \
       --gin_param LEARNING_RATE={LEARNING_RATE} \
       --gin_param BATCH_SIZE={BATCH_SIZE} \
       --gin_param MDP_MODULE_DISCOUNT={MDP_MODULE_DISCOUNT} \
+      --gin_param REWARD_OFFSET={REWARD_OFFSET} \
+      --gin_param USE_BIAS={USE_BIAS} \
       --results_dir $results_dir/{#}/" \
     ::: SEED $SEEDS \
-    ::: LEARNING_RATE $(for i in {0..5}; do bc -l <<< "2^(-$i + 2)"; done) \
-    ::: BATCH_SIZE 1 5 25 \
-    ::: MDP_MODULE_DISCOUNT 0.8 0.9 0.95
-
-#    ::: LEARNING_RATE $(for i in {2..7}; do bc -l <<< "2^(-$i + 1)"; done) \
-
-
-#parallel --nice 10 --linebuffer --shuf --joblog $results_dir/joblog --header : --results $results_dir/results.csv \
-#    "taskset -c "'$(( {%} - 1 ))'" python supervised.py \
-#      --gin_file $agent_config_path \
-#      --gin_file $env_config_path \
-#      --gin_param SEED={SEED} \
-#      --gin_param LEARNING_RATE={LEARNING_RATE} \
-#      --gin_param BATCH_SIZE={BATCH_SIZE} \
-#      --gin_param MDP_MODULE_DISCOUNT={MDP_MODULE_DISCOUNT} \
-#      --results_dir $results_dir/{#}/" \
-#    ::: SEED $SEEDS \
-#    ::: LEARNING_RATE $(for i in {0..3}; do bc -l <<< "2^(-$i + 1)"; done) \
-#    ::: BATCH_SIZE 1 5 25 \
-#    ::: MDP_MODULE_DISCOUNT 0.8 0.9 0.95
-##    ::: BATCH_SIZE 1 5 25 \
-##    ::: MDP_MODULE_DISCOUNT 0.9 0.95 0.975
-##    ::: MDP_MODULE_DISCOUNT 0.8 0.9 0.95
-##    ::: MDP_MODULE_DISCOUNT 0.8 0.9 0.95 0.975 0.9875 0.9935
-##    ::: LEARNING_RATE $(for i in {0..2}; do bc -l <<< "2^(-$i + 1)"; done) \
-##    ::: LEARNING_RATE $(for i in {1..4}; do bc -l <<< "2^-$i"; done) \
-##    ::: LEARNING_RATE $(for i in {1..4}; do bc -l <<< "2^-$i"; done) \  unnormalized rbf, explicit
-##    ::: LEARNING_RATE $(for i in {6..9}; do bc -l <<< "2^-$i"; done) \
-
-
-#parallel --nice 10 --linebuffer --shuf --joblog $results_dir/joblog --header : --results $results_dir/results.csv \
-#    "taskset -c "'$(( {%} - 1 ))'" python supervised.py \
-#      --gin_file $agent_config_path \
-#      --gin_file $env_config_path \
-#      --gin_param SEED={SEED} \
-#      --gin_param LEARNING_RATE={LEARNING_RATE} \
-#      --gin_param BATCH_SIZE={BATCH_SIZE} \
-#      --gin_param MDP_MODULE_DISCOUNT={MDP_MODULE_DISCOUNT} \
-#      --results_dir $results_dir/{#}/" \
-#    ::: SEED $SEEDS \
-#    ::: LEARNING_RATE $(for i in {1..4}; do bc -l <<< "2^(-$i)"; done) \
-#    ::: BATCH_SIZE 1 5 25 \
-#    ::: MDP_MODULE_DISCOUNT 0.8 0.9 0.95
+    ::: LEARNING_RATE $(for i in {0..5}; do bc -l <<< "2^(-$i + $lr_offset)"; done) \
+    ::: BATCH_SIZE 25 \
+    ::: MDP_MODULE_DISCOUNT 0.8 0.9 0.95 0.975 \
+    ::: REWARD_OFFSET 0. 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1 \
+    ::: USE_BIAS False

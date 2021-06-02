@@ -1,5 +1,7 @@
 import mountaincar.configurables
 
+REWARD_OFFSET = 0.
+
 MountainCarPolicy.epsilon = 0.1
 
 rollout_dataset.env_cls = @MountainCar
@@ -9,9 +11,11 @@ rollout_dataset.discount = 0.99
 
 train/rollout_dataset.num_traj = 10
 train/rollout_dataset.use_partial_traj = True
+train/rollout_dataset.reward_offset = %REWARD_OFFSET
 
 test/rollout_dataset.num_steps = 1000
 test/rollout_dataset.use_partial_traj = True
+test/rollout_dataset.reward_offset = %REWARD_OFFSET
 
 uniform_centers.env = @MountainCar()
 uniform_centers.centers_per_dim = 20

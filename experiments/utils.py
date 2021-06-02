@@ -1,3 +1,5 @@
+import logging
+
 import ast
 from concurrent import futures
 import glob
@@ -7,6 +9,8 @@ import os
 import pandas as pd
 
 import seaborn as sns
+
+logger = logging.getLogger()
 
 
 def load_run_v1(run_dir, config_dir):
@@ -59,6 +63,17 @@ def load_results(result_dir, config_dir=None):
     if config_dir is None:
         joblogs = pd.read_csv(os.path.join(result_dir, "results.csv"))
         joblogs = joblogs.rename(columns={"Seq": "run_id"})
+
+        failed = joblogs.Exitval != 0
+        failed |= joblogs.Signal != 0
+
+        if failed.any():
+            logger.warning((
+                f"Failed runs in directoy: {result_dir}\n"
+                f"dropping run id(s): {joblogs[failed].run_id.unique()}"
+            ))
+            joblogs = joblogs[~failed]
+
         joblogs = joblogs.drop(
             columns=["Host", "Starttime", "JobRuntime", "Send", "Receive", "Exitval", "Signal",
                      "Command", "Stdout", "Stderr"],

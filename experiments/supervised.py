@@ -70,13 +70,16 @@ def supervised_mdp_dataset(mdp, value_solver):
 
 
 @gin.configurable
-def supervised_mrc_dataset(key, mdp, policy):
+def supervised_mrc_dataset(key, mdp, policy, reward_offset=None):
     del key
 
     vprobs = jax.vmap(policy.probs)
-    a_probs = vprobs(jnp.arange((mdp.num_states(),)))
+    a_probs = vprobs(jnp.arange(mdp.num_states()))
 
     rewards = np.einsum("xa,xa->x", mdp.rewards, a_probs)
+    if reward_offset:
+        rewards += reward_offset
+
     transitions = np.einsum("xay,xa->xy", mdp.transitions[:, :, :], a_probs)
     values = np.linalg.solve(np.eye(mdp.num_states()) - mdp.discounts * transitions, rewards)
 
@@ -100,7 +103,8 @@ def rollout_dataset(key, *,
                     discount: float,
                     num_traj: Optional[int] = None,
                     num_steps: Optional[int] = None,
-                    use_partial_traj: bool = True):
+                    use_partial_traj: bool = True,
+                    reward_offset: Optional[float] = None):
     if num_traj == num_steps:
         raise TypeError((
             "Either `num_traj` or `num_steps` is required. Providing a value for both is not "
@@ -125,7 +129,8 @@ def rollout_dataset(key, *,
         traj_key, policy_key = jax.random.split(policy_key)
         traj, _ = rollout.generate_trajectory(traj_key, env, policy, max_steps=traj_len_limit)
 
-        observations, returns = rollout.per_observation_discounted_returns(traj, discount)
+        observations, returns = rollout.per_observation_discounted_returns(
+            traj, discount, reward_offset=reward_offset)
         if not use_partial_traj:
             observations = observations[:1]
             returns = returns[:1]

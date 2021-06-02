@@ -84,7 +84,7 @@ class MountainCar(dm_env.Environment):
         obs = self._observation()
 
         if self._position >= self._goal_pos:
-            return dm_env.termination(reward=reward, observation=obs)
+            return dm_env.termination(reward=0., observation=obs)
 
         return dm_env.transition(reward=reward, observation=obs)
 

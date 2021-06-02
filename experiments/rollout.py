@@ -86,11 +86,15 @@ def discounted_returns(trajectory: Sequence[dm_env.TimeStep],
 
 def per_observation_discounted_returns(trajectory: Sequence[dm_env.TimeStep],
                                        extra_discount: chex.Numeric = 1.,
+                                       reward_offset: Optional[float] = None,
                                        ) -> Tuple[np.ndarray, np.ndarray]:
+    if reward_offset is None:
+        reward_offset = 0.
+
     _, rewards, discounts, observations = zip(*trajectory)
     returns = [0.]
     for rew, discount in zip(rewards[:0:-1], discounts[:0:-1]):
-        returns.append(rew + extra_discount * discount * returns[-1])
+        returns.append(rew + reward_offset + extra_discount * discount * returns[-1])
     return np.array(observations[:-1]), np.array(returns[:0:-1])
 
 

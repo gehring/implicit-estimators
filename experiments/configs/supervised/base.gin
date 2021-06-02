@@ -1,6 +1,7 @@
 LEARNING_RATE = 1e-2
 BATCH_SIZE = 1
 WEIGHTS_VI_TOL = 1e-6
+USE_BIAS = False
 
 weights/ValueIteration.tol = %WEIGHTS_VI_TOL
 weights/ValueIteration.maxiter = 5000
@@ -31,7 +32,7 @@ batch_generator.replace = True
 adam.learning_rate = %LEARNING_RATE
 sgd.learning_rate = %LEARNING_RATE
 
-LinearModule.use_bias = False
+LinearModule.use_bias = %USE_BIAS
 
 train.model = @LinearModule()
 train.optimizer = @sgd()

@@ -1,6 +1,7 @@
 import four_rooms.configurables
 
 FOUR_ROOMS_DISCOUNT = 0.9
+REWARD_OFFSET = 0.
 
 create_four_rooms.goal = (7, 1)
 create_four_rooms.discount = %FOUR_ROOMS_DISCOUNT
@@ -24,9 +25,11 @@ train/rollout_dataset.max_traj_length = 80
 train/rollout_dataset.num_traj = 80
 train/rollout_dataset.discount = %FOUR_ROOMS_DISCOUNT
 train/rollout_dataset.use_partial_traj = True
+train/rollout_dataset.reward_offset = %REWARD_OFFSET
 
 test/supervised_mrc_dataset.mdp = @create_four_rooms()
 test/supervised_mrc_dataset.policy = @FourRoomsPolicy()
+test/supervised_mrc_dataset.reward_offset = %REWARD_OFFSET
 
 dataset_factory.train_dataset_cls = @train/rollout_dataset
 dataset_factory.test_dataset_cls = @test/supervised_mrc_dataset
