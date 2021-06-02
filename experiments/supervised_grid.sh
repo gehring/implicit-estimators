@@ -14,7 +14,7 @@ env_name=$(basename $env_config_path .gin)
 
 lr_offset=$3
 
-results_dir=${4:-"${HOME}/results"}/$env_name/$agent_name/$(date +%Y%m%d%H%M)
+results_dir=${4:-"results"}/$env_name/$agent_name/$(date +%Y%m%d%H%M)
 
 export JAX_ENABLE_X64=True
 
