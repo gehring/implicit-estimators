@@ -1,0 +1,122 @@
+import chain.configurables
+
+# Macros:
+# ==============================================================================
+BATCH_SIZE = 25
+CHAIN_DISCOUNT = 0.9
+LEARNING_RATE = 0.125
+MDP_MODULE_DISCOUNT = 0.8
+NUM_STATES = 11
+REWARD_OFFSET = 0.1
+SEED = 3390822559
+USE_BIAS = False
+WEIGHTS_VI_TOL = 1e-06
+
+# Parameters for batch_generator:
+# ==============================================================================
+batch_generator.batch_size = %BATCH_SIZE
+batch_generator.replace = True
+
+# Parameters for test/ChainPolicy:
+# ==============================================================================
+test/ChainPolicy.epsilon = 0.1
+
+# Parameters for train/ChainPolicy:
+# ==============================================================================
+train/ChainPolicy.epsilon = 0.1
+
+# Parameters for test/create_chain_mdp:
+# ==============================================================================
+test/create_chain_mdp.bad_reward = 1.0
+test/create_chain_mdp.discount = %CHAIN_DISCOUNT
+test/create_chain_mdp.good_reward = 10.0
+test/create_chain_mdp.num_states = %NUM_STATES
+test/create_chain_mdp.slip_prob = 0.0
+
+# Parameters for train/create_chain_mdp:
+# ==============================================================================
+train/create_chain_mdp.bad_reward = 1.0
+train/create_chain_mdp.discount = %CHAIN_DISCOUNT
+train/create_chain_mdp.good_reward = 10.0
+train/create_chain_mdp.num_states = %NUM_STATES
+train/create_chain_mdp.slip_prob = 0.0
+
+# Parameters for dataset_factory:
+# ==============================================================================
+dataset_factory.test_dataset_cls = @test/supervised_mrc_dataset
+dataset_factory.train_dataset_cls = @train/rollout_dataset
+
+# Parameters for weights/ExplicitMDP:
+# ==============================================================================
+weights/ExplicitMDP.discount_init = %MDP_MODULE_DISCOUNT
+weights/ExplicitMDP.num_pseudo_actions = 1
+
+# Parameters for identity_offset:
+# ==============================================================================
+# None.
+
+# Parameters for launch:
+# ==============================================================================
+launch.data_factory = @dataset_factory
+launch.seed = %SEED
+
+# Parameters for LinearModule:
+# ==============================================================================
+LinearModule.encoder = @OneHot()
+LinearModule.use_bias = %USE_BIAS
+LinearModule.weight_module = @MDPSolveWeights()
+
+# Parameters for max_reduce:
+# ==============================================================================
+# None.
+
+# Parameters for train/MDPEnv:
+# ==============================================================================
+train/MDPEnv.init_prob = None
+train/MDPEnv.mdp = @create_chain_mdp()
+
+# Parameters for MDPSolveWeights:
+# ==============================================================================
+MDPSolveWeights.mdp_module = @weights/ExplicitMDP()
+MDPSolveWeights.solver = @weights/ValueIteration()
+
+# Parameters for OneHot:
+# ==============================================================================
+OneHot.dim = %NUM_STATES
+
+# Parameters for train/rollout_dataset:
+# ==============================================================================
+train/rollout_dataset.discount = %CHAIN_DISCOUNT
+train/rollout_dataset.env_cls = @MDPEnv
+train/rollout_dataset.max_traj_length = 100
+train/rollout_dataset.num_steps = None
+train/rollout_dataset.num_traj = 50
+train/rollout_dataset.policy = @ChainPolicy()
+train/rollout_dataset.reward_offset = %REWARD_OFFSET
+train/rollout_dataset.use_partial_traj = False
+
+# Parameters for sgd:
+# ==============================================================================
+sgd.learning_rate = %LEARNING_RATE
+sgd.momentum = 0.0
+sgd.nesterov = False
+
+# Parameters for test/supervised_mrc_dataset:
+# ==============================================================================
+test/supervised_mrc_dataset.mdp = @create_chain_mdp()
+test/supervised_mrc_dataset.policy = @ChainPolicy()
+test/supervised_mrc_dataset.reward_offset = %REWARD_OFFSET
+
+# Parameters for train:
+# ==============================================================================
+train.eval_period = 10
+train.model = @LinearModule()
+train.num_iterations = 300
+train.optimizer = @sgd()
+
+# Parameters for weights/ValueIteration:
+# ==============================================================================
+weights/ValueIteration.maxiter = 5000
+weights/ValueIteration.offset = @identity_offset
+weights/ValueIteration.reduce = @max_reduce
+weights/ValueIteration.tol = %WEIGHTS_VI_TOL

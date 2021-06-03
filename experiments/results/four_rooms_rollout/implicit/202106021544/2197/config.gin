@@ -1,0 +1,144 @@
+import four_rooms.configurables
+
+# Macros:
+# ==============================================================================
+BATCH_SIZE = 25
+FOUR_ROOMS_DISCOUNT = 0.9
+LEARNING_RATE = 0.25
+MDP_MODULE_DISCOUNT = 0.95
+REWARD_OFFSET = 0.1
+SEED = 1395720285
+USE_BIAS = False
+WEIGHTS_VI_TOL = 1e-06
+
+# Parameters for batch_generator:
+# ==============================================================================
+batch_generator.batch_size = %BATCH_SIZE
+batch_generator.replace = True
+
+# Parameters for test/create_four_rooms:
+# ==============================================================================
+test/create_four_rooms.discount = %FOUR_ROOMS_DISCOUNT
+test/create_four_rooms.fail_prob = 0.3333333333333333
+test/create_four_rooms.goal = (7, 1)
+
+# Parameters for train/create_four_rooms:
+# ==============================================================================
+train/create_four_rooms.discount = %FOUR_ROOMS_DISCOUNT
+train/create_four_rooms.fail_prob = 0.3333333333333333
+train/create_four_rooms.goal = (7, 1)
+
+# Parameters for dataset_factory:
+# ==============================================================================
+dataset_factory.test_dataset_cls = @test/supervised_mrc_dataset
+dataset_factory.train_dataset_cls = @train/rollout_dataset
+
+# Parameters for weights/ExplicitMDP:
+# ==============================================================================
+weights/ExplicitMDP.discount_init = %MDP_MODULE_DISCOUNT
+weights/ExplicitMDP.num_pseudo_actions = 1
+
+# Parameters for test/FourRoomsPolicy:
+# ==============================================================================
+test/FourRoomsPolicy.epsilon = 0.1
+test/FourRoomsPolicy.mdp = @create_four_rooms()
+test/FourRoomsPolicy.value_solver = @policy/ValueIteration()
+
+# Parameters for train/FourRoomsPolicy:
+# ==============================================================================
+train/FourRoomsPolicy.epsilon = 0.1
+train/FourRoomsPolicy.mdp = @create_four_rooms()
+train/FourRoomsPolicy.value_solver = @policy/ValueIteration()
+
+# Parameters for identity_offset:
+# ==============================================================================
+# None.
+
+# Parameters for test/identity_offset:
+# ==============================================================================
+# None.
+
+# Parameters for train/identity_offset:
+# ==============================================================================
+# None.
+
+# Parameters for launch:
+# ==============================================================================
+launch.data_factory = @dataset_factory
+launch.seed = %SEED
+
+# Parameters for LinearModule:
+# ==============================================================================
+LinearModule.encoder = @OneHot()
+LinearModule.use_bias = %USE_BIAS
+LinearModule.weight_module = @MDPSolveWeights()
+
+# Parameters for max_reduce:
+# ==============================================================================
+# None.
+
+# Parameters for test/max_reduce:
+# ==============================================================================
+# None.
+
+# Parameters for train/max_reduce:
+# ==============================================================================
+# None.
+
+# Parameters for train/MDPEnv:
+# ==============================================================================
+train/MDPEnv.init_prob = None
+train/MDPEnv.mdp = @create_four_rooms()
+
+# Parameters for MDPSolveWeights:
+# ==============================================================================
+MDPSolveWeights.mdp_module = @weights/ExplicitMDP()
+MDPSolveWeights.solver = @weights/ValueIteration()
+
+# Parameters for OneHot:
+# ==============================================================================
+OneHot.dim = 121
+
+# Parameters for train/rollout_dataset:
+# ==============================================================================
+train/rollout_dataset.discount = %FOUR_ROOMS_DISCOUNT
+train/rollout_dataset.env_cls = @MDPEnv
+train/rollout_dataset.max_traj_length = 80
+train/rollout_dataset.num_steps = None
+train/rollout_dataset.num_traj = 80
+train/rollout_dataset.policy = @FourRoomsPolicy()
+train/rollout_dataset.reward_offset = %REWARD_OFFSET
+train/rollout_dataset.use_partial_traj = True
+
+# Parameters for sgd:
+# ==============================================================================
+sgd.learning_rate = %LEARNING_RATE
+sgd.momentum = 0.0
+sgd.nesterov = False
+
+# Parameters for test/supervised_mrc_dataset:
+# ==============================================================================
+test/supervised_mrc_dataset.mdp = @create_four_rooms()
+test/supervised_mrc_dataset.policy = @FourRoomsPolicy()
+test/supervised_mrc_dataset.reward_offset = %REWARD_OFFSET
+
+# Parameters for train:
+# ==============================================================================
+train.eval_period = 10
+train.model = @LinearModule()
+train.num_iterations = 300
+train.optimizer = @sgd()
+
+# Parameters for policy/ValueIteration:
+# ==============================================================================
+policy/ValueIteration.maxiter = 5000
+policy/ValueIteration.offset = @identity_offset
+policy/ValueIteration.reduce = @max_reduce
+policy/ValueIteration.tol = %WEIGHTS_VI_TOL
+
+# Parameters for weights/ValueIteration:
+# ==============================================================================
+weights/ValueIteration.maxiter = 5000
+weights/ValueIteration.offset = @identity_offset
+weights/ValueIteration.reduce = @max_reduce
+weights/ValueIteration.tol = %WEIGHTS_VI_TOL
