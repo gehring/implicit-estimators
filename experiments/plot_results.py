@@ -27,11 +27,11 @@ ylims = {
 }
 
 RUN_IDS = {
-    ("chain_rollout", "explicit"): 202106021224,
-    ("chain_rollout", "implicit"): 202106021312,
+    ("chain_rollout", "explicit"): 202106021905,
+    ("chain_rollout", "implicit"): 202106021949,
     ("four_rooms_rollout", "explicit"): 202106021401,
     ("four_rooms_rollout", "implicit"): 202106021544,
-    ("mountaincar", "explicit"): 202106021459,
+    ("mountaincar", "explicit"): 202106021808,
     ("mountaincar", "implicit"): 202106021646,
 }
 
@@ -47,7 +47,7 @@ BEST_HPARAMS = {
                                          {"LEARNING_RATE": 2**1, "MDP_MODULE_DISCOUNT": 0.9},
                                          {"LEARNING_RATE": 1., "MDP_MODULE_DISCOUNT": 0.95},
                                          {"LEARNING_RATE": 2**-2, "MDP_MODULE_DISCOUNT": 0.975}],
-    ("mountaincar", "explicit"): [{"LEARNING_RATE": 2**4}],  #
+    ("mountaincar", "explicit"): [{"LEARNING_RATE": 2**7}],  #
     ("mountaincar", "implicit"): [{"LEARNING_RATE": 2**2, "MDP_MODULE_DISCOUNT": 0.8},
                                   {"LEARNING_RATE": 2**1, "MDP_MODULE_DISCOUNT": 0.9},
                                   {"LEARNING_RATE": 1., "MDP_MODULE_DISCOUNT": 0.95},
